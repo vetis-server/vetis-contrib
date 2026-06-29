@@ -26,9 +26,12 @@ jobs:
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
 
-    - name: Run tests
+    - name: Install nextest
+      uses: taiki-e/install-action@nextest
+
+    - name: Run all tests
       run: |
-        cargo test
+          cargo nextest run
 
   test-matrix:
     name: Test ${{ matrix.platform.os-name }}
