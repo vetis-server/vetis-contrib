@@ -24,4 +24,3 @@ time = "0.3.41"
 tokio = "1.52.3"
 typetag = "0.2.21"
 vetis = { version = "0.1.4-beta.9" }
-vetis-tokio = { version = "0.1.0-beta.4" }

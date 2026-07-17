@@ -1,7 +1,7 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
 use deboa::{request::DeboaRequest, HttpClient};
-use deboa_tokio::{client::conn::pool::HttpConnectionPool, Client};
+use deboa_tokio::{client::http::conn::pool::HttpConnectionPool, Client};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::{future::Future, pin::Pin, sync::Arc};

@@ -423,9 +423,9 @@ dependencies = [
 
 [[package]]
 name = "deboa"
-version = "0.1.0-beta.23"
+version = "0.1.0-beta.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a417624519eeb9962415b091c0444ff85f2df7556318b3bff347ac7c5d1eb960"
+checksum = "d197a18562fbe9388fecce5aa064fe3d7873b0d9bf3ea4c32c84f7f5871c305a"
 dependencies = [
  "async-trait",
  "base64",
@@ -453,9 +453,9 @@ dependencies = [
 
 [[package]]
 name = "deboa-tokio"
-version = "0.1.0-beta.11"
+version = "0.1.0-beta.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b825bf78d4d53d3863360d1dcf44ba14024db57be6cd650a2a2036cb0c2166bc"
+checksum = "b5ca71812af8aef4d2137e252cc2c3b8d887a0a2200218492a5aeef13e9b3b23"
 dependencies = [
  "async-trait",
  "base64",
@@ -629,7 +629,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2246,7 +2246,6 @@ dependencies = [
  "tokio",
  "typetag",
  "vetis",
- "vetis-tokio",
 ]
 
 [[package]]
