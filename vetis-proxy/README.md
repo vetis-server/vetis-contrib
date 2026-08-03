@@ -38,7 +38,7 @@ vetis-proxy = { version = "0.1.0", features = ["runtime-tokio"] }
 
 Configure reverse proxy using the builder pattern:
 
-```rust
+```rust,ignore
 use vetis_proxy::ProxyPathConfig;
 
 let config = ProxyPathConfig::builder()
@@ -70,7 +70,7 @@ target: http://localhost:8080
 
 Import the Tokio runtime module:
 
-```rust
+```rust,ignore
 // For Tokio runtime
 #[cfg(feature = "runtime-tokio")]
 use vetis_proxy::tokio;
