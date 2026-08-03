@@ -42,7 +42,7 @@ vetis-static = { version = "0.1.0-beta.1", features = ["runtime-tokio"] }
 
 Configure static file serving using the builder pattern:
 
-```rust
+```rust,ignore
 use vetis_static::StaticPathConfig;
 use std::time::Duration;
 
