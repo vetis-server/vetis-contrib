@@ -19,10 +19,6 @@ use crate::common::{CA_CERT, SERVER_CERT, SERVER_KEY};
 
 #[tokio::test]
 async fn test_get_proxy_to_target() -> Result<(), Box<dyn Error>> {
-    env_logger::Builder::from_env(env_logger::Env::default().filter_or("RUST_LOG", "info"))
-        .format_module_path(false)
-        .init();
-
     let source_listener = ListenerConfig::builder()
         .port(8084)
         .protocol_version(Version::HTTP_11)
@@ -124,10 +120,6 @@ async fn test_get_proxy_to_target() -> Result<(), Box<dyn Error>> {
 
 #[tokio::test]
 async fn test_post_proxy_to_target() -> Result<(), Box<dyn Error>> {
-    env_logger::Builder::from_env(env_logger::Env::default().filter_or("RUST_LOG", "info"))
-        .format_module_path(false)
-        .init();
-
     let source_listener = ListenerConfig::builder()
         .port(9093)
         .protocol_version(Version::HTTP_11)
