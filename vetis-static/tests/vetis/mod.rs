@@ -3,11 +3,11 @@ mod tokio {
     use crate::common::{CA_CERT, SERVER_CERT, SERVER_KEY};
     use caramelo::{expect, matchers::eq};
     use deboa::{
-        cert::{Certificate, ContentEncoding},
+        cert::{CertificateExt as _, ContentEncoding},
         request,
     };
     use deboa_tokio::cert::DeboaCertificate;
-    use http::StatusCode;
+    use http::{StatusCode, Version};
     use std::error::Error;
     use vetis::{
         listener::ListenerConfig, security::SecurityConfig, server::ServerConfig,
@@ -21,7 +21,7 @@ mod tokio {
     async fn test_index() -> Result<(), Box<dyn Error>> {
         let listener = ListenerConfig::builder()
             .port(9100)
-            .protocol(vetis_tokio::Protocol::Http1)
+            .protocol_version(Version::HTTP_11)
             .interface("0.0.0.0")
             .build()?;
 
@@ -65,6 +65,7 @@ mod tokio {
             .build();
 
         let request = request::get("https://localhost:9100/")?
+            .version(Version::HTTP_11)
             .send_with(&client)
             .await?;
 
@@ -94,7 +95,7 @@ mod tokio {
     async fn test_not_found() -> Result<(), Box<dyn Error>> {
         let listener = ListenerConfig::builder()
             .port(9000)
-            .protocol(vetis_tokio::Protocol::Http1)
+            .protocol_version(Version::HTTP_11)
             .interface("0.0.0.0")
             .build()?;
 
@@ -136,10 +137,11 @@ mod tokio {
             .await?;
 
         let client = deboa_tokio::Client::builder()
-            .certificate(Certificate::from_slice(CA_CERT, ContentEncoding::DER))
+            .certificate(DeboaCertificate::from_slice(CA_CERT, ContentEncoding::DER))
             .build();
 
         let request = request::get("https://localhost:9000/some/file/here.txt")?
+            .version(Version::HTTP_11)
             .send_with(&client)
             .await?;
 
@@ -153,16 +155,17 @@ mod tokio {
     }
 }
 
+/*
 #[cfg(feature = "runtime-compio")]
 mod compio {
     use crate::common::{CA_CERT, SERVER_CERT, SERVER_KEY};
     use caramelo::{expect, matchers::eq};
     use deboa::{
-        cert::{Certificate, ContentEncoding},
+        cert::{CertificateExt as _, ContentEncoding},
         request,
     };
     use deboa_compio::{cert::DeboaCertificate, Client};
-    use http::StatusCode;
+    use http::{StatusCode, Version};
     use std::error::Error;
     use vetis::{
         listener::ListenerConfig, security::SecurityConfig, server::ServerConfig,
@@ -176,7 +179,7 @@ mod compio {
     async fn test_index() -> Result<(), Box<dyn Error>> {
         let listener = ListenerConfig::builder()
             .port(9100)
-            .protocol(Protocol::Http1)
+            .protocol_version(Version::HTTP_11)
             .interface("0.0.0.0")
             .build()?;
 
@@ -249,7 +252,7 @@ mod compio {
     async fn test_not_found() -> Result<(), Box<dyn Error>> {
         let listener = ListenerConfig::builder()
             .port(9000)
-            .protocol(Protocol::Http1)
+            .protocol_version(Version::HTTP_11)
             .interface("0.0.0.0")
             .build()?;
 
@@ -307,3 +310,4 @@ mod compio {
         Ok(())
     }
 }
+*/

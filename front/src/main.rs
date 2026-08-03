@@ -1,4 +1,5 @@
 use clap::Parser;
+use http::Version;
 use std::error::Error;
 use terminal_link::Link;
 use vetis::{
@@ -60,7 +61,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let listener = ListenerConfig::builder()
         .port(port)
-        .protocol(vetis_tokio::Protocol::Http1)
+        .protocol_version(Version::HTTP_11)
         .interface(&interface)
         .build()?;
 

@@ -11,7 +11,7 @@ use vetis::{
 
 static CLIENT: Lazy<Client> = Lazy::new(|| {
     Client::builder()
-        .pool(HttpConnectionPool::default())
+        .connection_pool(HttpConnectionPool::default())
         .build()
 });
 
@@ -74,6 +74,7 @@ impl Path for ProxyPath {
             };
 
             let deboa_request = match deboa_request
+                .version(request_parts.version)
                 .headers(request_parts.headers)
                 .body(request_body)
                 .build()

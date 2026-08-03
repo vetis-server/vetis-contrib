@@ -1,9 +1,10 @@
+use caramelo::{expect, matchers::eq};
 use deboa::{
-    cert::{Certificate as _, ContentEncoding},
+    cert::{CertificateExt, ContentEncoding},
     request,
 };
 use deboa_tokio::cert::DeboaCertificate;
-use http::StatusCode;
+use http::{StatusCode, Version};
 use http_body_util::BodyExt as _;
 use std::error::Error;
 use vetis::{virtual_host::VirtualHost as _, Response, VetisServer as _};
@@ -18,15 +19,19 @@ use crate::common::{CA_CERT, SERVER_CERT, SERVER_KEY};
 
 #[tokio::test]
 async fn test_get_proxy_to_target() -> Result<(), Box<dyn Error>> {
+    env_logger::Builder::from_env(env_logger::Env::default().filter_or("RUST_LOG", "info"))
+        .format_module_path(false)
+        .init();
+
     let source_listener = ListenerConfig::builder()
         .port(8084)
-        .protocol(vetis_tokio::Protocol::Http1)
+        .protocol_version(Version::HTTP_11)
         .interface("0.0.0.0")
         .build()?;
 
     let target_listener = ListenerConfig::builder()
         .port(8085)
-        .protocol(vetis_tokio::Protocol::Http1)
+        .protocol_version(Version::HTTP_11)
         .interface("0.0.0.0")
         .build()?;
 
@@ -95,20 +100,20 @@ async fn test_get_proxy_to_target() -> Result<(), Box<dyn Error>> {
 
     let client = deboa_tokio::Client::builder()
         .certificate(DeboaCertificate::from_slice(CA_CERT, ContentEncoding::DER))
-        .protocol(deboa::HttpVersion::Http1)
         .build();
 
     let request = request::get("https://localhost:8085/")?
+        .version(Version::HTTP_11)
         .send_with(&client)
         .await?;
 
-    assert_eq!(request.status(), StatusCode::OK);
-    assert_eq!(
+    expect(request.status()).to_be(eq(StatusCode::OK));
+    expect(
         request
             .text()
             .await?,
-        "Hello, world!"
-    );
+    )
+    .to_be(eq("Hello, world!"));
 
     server
         .stop()
@@ -119,15 +124,19 @@ async fn test_get_proxy_to_target() -> Result<(), Box<dyn Error>> {
 
 #[tokio::test]
 async fn test_post_proxy_to_target() -> Result<(), Box<dyn Error>> {
+    env_logger::Builder::from_env(env_logger::Env::default().filter_or("RUST_LOG", "info"))
+        .format_module_path(false)
+        .init();
+
     let source_listener = ListenerConfig::builder()
         .port(9093)
-        .protocol(vetis_tokio::Protocol::Http1)
+        .protocol_version(Version::HTTP_11)
         .interface("0.0.0.0")
         .build()?;
 
     let target_listener = ListenerConfig::builder()
         .port(9094)
-        .protocol(vetis_tokio::Protocol::Http1)
+        .protocol_version(Version::HTTP_11)
         .interface("0.0.0.0")
         .build()?;
 
@@ -202,21 +211,21 @@ async fn test_post_proxy_to_target() -> Result<(), Box<dyn Error>> {
 
     let client = deboa_tokio::Client::builder()
         .certificate(DeboaCertificate::from_slice(CA_CERT, ContentEncoding::DER))
-        .protocol(deboa::HttpVersion::Http1)
         .build();
 
     let response = request::post("https://localhost:9093/")?
         .text("Something cool!")
+        .version(Version::HTTP_11)
         .send_with(&client)
         .await?;
 
-    assert_eq!(response.status(), StatusCode::OK);
-    assert_eq!(
+    expect(response.status()).to_be(eq(StatusCode::OK));
+    expect(
         response
             .text()
             .await?,
-        "Something cool!"
-    );
+    )
+    .to_be(eq("Something cool!"));
 
     server
         .stop()
