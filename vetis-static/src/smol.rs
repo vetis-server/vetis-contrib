@@ -5,6 +5,8 @@ use log::error;
 use smol::fs::File;
 #[cfg(unix)]
 use std::os::unix::fs::MetadataExt;
+#[cfg(windows)]
+use std::os::windows::fs::MetadataExt;
 use std::{future::Future, path::PathBuf, pin::Pin, sync::Arc};
 use vetis::{
     errors::{FileError, VetisError, VirtualHostError},

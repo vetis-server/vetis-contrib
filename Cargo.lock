@@ -906,7 +906,7 @@ dependencies = [
  "terminal-link",
  "tokio",
  "vetis",
- "vetis-static 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vetis-static",
  "vetis-tokio",
 ]
 
@@ -3132,27 +3132,6 @@ dependencies = [
  "vetis",
  "vetis-macros",
  "vetis-smol",
- "vetis-tokio",
-]
-
-[[package]]
-name = "vetis-static"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7b9498824094537e178b33e67341f1b5bb241f60867c4186f0e5a1198eaaace"
-dependencies = [
- "duration-str",
- "http",
- "hyper-body-utils",
- "log",
- "minimime",
- "regex",
- "send_wrapper",
- "serde",
- "time",
- "tokio",
- "typetag",
- "vetis",
  "vetis-tokio",
 ]
 
