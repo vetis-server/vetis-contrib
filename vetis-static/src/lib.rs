@@ -8,7 +8,7 @@ use std::{
 use time::{format_description::well_known::Rfc2822, OffsetDateTime};
 use vetis::{
     errors::{ConfigError, VetisError},
-    virtual_host::path::PathConfig,
+    host::path::PathConfig,
     VetisResult,
 };
 
@@ -24,9 +24,9 @@ const DEFAULT_CAPACITY: u64 = 1000;
 /// Compio runtime support module
 pub mod compio;
 */
-#[cfg(feature = "runtime-smol")]
+//#[cfg(feature = "runtime-smol")]
 /// Smol runtime support module
-pub mod smol;
+///pub mod smol;
 #[cfg(feature = "runtime-tokio")]
 /// Tokio runtime support module
 pub mod tokio;

@@ -8,25 +8,27 @@ mod tokio {
     };
     use deboa_tokio::cert::DeboaCertificate;
     use http::{StatusCode, Version};
-    use std::error::Error;
+    use std::{
+        error::Error,
+        net::{IpAddr, Ipv4Addr},
+    };
     use vetis::{
-        listener::ListenerConfig, security::SecurityConfig, server::ServerConfig,
-        virtual_host::VirtualHostConfig, VetisServer,
+        host::HostConfig, listener::ListenerConfig, security::SecurityConfig, VetisServer,
     };
     use vetis_macros::status_pages;
     use vetis_static::{tokio::StaticPath, StaticPathConfig};
-    use vetis_tokio::{virtual_host::VirtualHostImpl, Vetis};
+    use vetis_tokio::{host::Host, listener::build_listeners, Vetis};
 
     #[tokio::test]
     async fn test_index() -> Result<(), Box<dyn Error>> {
         let listener = ListenerConfig::builder()
             .port(9100)
-            .protocol_version(Version::HTTP_11)
-            .interface("0.0.0.0")
-            .build()?;
-
-        let config = ServerConfig::builder()
-            .add_listener(listener)
+            .protos(vec![Version::HTTP_11])
+            .interface(
+                "0.0.0.0"
+                    .parse()
+                    .unwrap(),
+            )
             .build()?;
 
         let security_config = SecurityConfig::builder()
@@ -35,14 +37,14 @@ mod tokio {
             .key_from_bytes(SERVER_KEY.to_vec())
             .build()?;
 
-        let host_config = VirtualHostConfig::builder()
+        let host_config = HostConfig::builder()
             .hostname("localhost")
-            .port(9100)
-            .root_directory("tests")
+            .root_directory("tests".into())
             .security(security_config.clone())
+            .bind_addresses(vec![(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 9100)])
             .build()?;
 
-        let mut virtual_host = VirtualHostImpl::new(host_config);
+        let mut virtual_host = Host::new(host_config);
         virtual_host.add_path(StaticPath::new(
             StaticPathConfig::builder()
                 .uri("/")
@@ -51,10 +53,10 @@ mod tokio {
                 .build()?,
         ));
 
-        let mut server = Vetis::new(config);
-        server
-            .add_virtual_host(virtual_host)
-            .await;
+        let mut server = Vetis::builder()
+            .add_listeners(build_listeners(listener))?
+            .add_host(virtual_host)?
+            .build();
 
         server
             .start()
@@ -95,12 +97,12 @@ mod tokio {
     async fn test_not_found() -> Result<(), Box<dyn Error>> {
         let listener = ListenerConfig::builder()
             .port(9000)
-            .protocol_version(Version::HTTP_11)
-            .interface("0.0.0.0")
-            .build()?;
-
-        let config = ServerConfig::builder()
-            .add_listener(listener)
+            .protos(vec![Version::HTTP_11])
+            .interface(
+                "0.0.0.0"
+                    .parse()
+                    .unwrap(),
+            )
             .build()?;
 
         let security_config = SecurityConfig::builder()
@@ -109,17 +111,17 @@ mod tokio {
             .key_from_bytes(SERVER_KEY.to_vec())
             .build()?;
 
-        let host_config = VirtualHostConfig::builder()
+        let host_config = HostConfig::builder()
             .hostname("localhost")
-            .port(9000)
-            .root_directory("tests")
+            .root_directory("tests".into())
             .security(security_config.clone())
+            .bind_addresses(vec![(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 9000)])
             .status_pages(status_pages! {
                404 @ "tests/files/404.html".to_string()
             })
             .build()?;
 
-        let mut virtual_host = VirtualHostImpl::new(host_config);
+        let mut virtual_host = Host::new(host_config);
         virtual_host.add_path(StaticPath::new(
             StaticPathConfig::builder()
                 .uri("/")
@@ -127,10 +129,10 @@ mod tokio {
                 .build()?,
         ));
 
-        let mut server = Vetis::new(config);
-        server
-            .add_virtual_host(virtual_host)
-            .await;
+        let mut server = Vetis::builder()
+            .add_listeners(build_listeners(listener))?
+            .add_host(virtual_host)?
+            .build();
 
         server
             .start()
@@ -169,9 +171,9 @@ mod compio {
     use std::error::Error;
     use vetis::{
         listener::ListenerConfig, security::SecurityConfig, server::ServerConfig,
-        virtual_host::VirtualHostConfig, VetisServer,
+        virtual_host::HostConfig, VetisServer,
     };
-    use vetis_compio::{virtual_host::VirtualHostImpl, Protocol, Vetis};
+    use vetis_compio::{virtual_host::Host, Protocol, Vetis};
     use vetis_macros::status_pages;
     use vetis_static::{compio::StaticPath, StaticPathConfig};
 
@@ -193,14 +195,14 @@ mod compio {
             .key_from_bytes(SERVER_KEY.to_vec())
             .build()?;
 
-        let host_config = VirtualHostConfig::builder()
+        let host_config = HostConfig::builder()
             .hostname("localhost")
             .port(9100)
             .root_directory("tests")
             .security(security_config.clone())
             .build()?;
 
-        let mut virtual_host = VirtualHostImpl::new(host_config);
+        let mut virtual_host = Host::new(host_config);
         virtual_host.add_path(StaticPath::new(
             StaticPathConfig::builder()
                 .uri("/")
@@ -266,7 +268,7 @@ mod compio {
             .key_from_bytes(SERVER_KEY.to_vec())
             .build()?;
 
-        let host_config = VirtualHostConfig::builder()
+        let host_config = HostConfig::builder()
             .hostname("localhost")
             .port(9000)
             .root_directory("tests")
@@ -276,7 +278,7 @@ mod compio {
             })
             .build()?;
 
-        let mut virtual_host = VirtualHostImpl::new(host_config);
+        let mut virtual_host = Host::new(host_config);
         virtual_host.add_path(StaticPath::new(
             StaticPathConfig::builder()
                 .uri("/")

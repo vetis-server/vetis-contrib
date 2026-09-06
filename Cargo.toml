@@ -8,6 +8,7 @@ members = [
     #"vetis-asgi",
     #"vetis-fcgi",
     "vetis-proxy",
+    "vetis-rev-proxy",
     #"vetis-rack",
     #"vetis-rsgi",
     #"vetis-sapi",
@@ -25,15 +26,19 @@ license = "MIT OR Apache-2.0"
 rust-version = "1.75.0"
 
 [workspace.dependencies]
-#vetis-asgi = { path = "vetis-asgi" }
-#vetis-fcgi = { path = "vetis-fcgi" }
-vetis-proxy = { path = "vetis-proxy" }
-#vetis-rack = { path = "vetis-rack" }
-#vetis-rsgi = { path = "vetis-rsgi" }
-#vetis-sapi = { path = "vetis-sapi" }
-#vetis-scgi = { path = "vetis-scgi" }
+#deboa = { path = "../deboa/deboa" }
+deboa = { version = "0.1.5-beta.2" }
+#deboa-tokio = { path = "../deboa-tokio/deboa-tokio", default-features = false }
+deboa-tokio = { version = "0.1.4-beta.3", default-features = false }
+http = "1.5.0"
+hyper-body-utils = "0.1.17"
+log = "0.4.33"
+pyo3 = { version = "0.29.0", features = ["auto-initialize"] }
+#vetis = { path = "../vetis/vetis" }
+vetis = { version = "0.1.7-beta.1" }
 vetis-static = { path = "vetis-static" }
-#vetis-wsgi = { path = "vetis-wsgi" }
+#vetis-tokio = { path = "../vetis-tokio", optional = true, default-features = false }
+vetis-tokio = { version = "0.1.2-beta.1", default-features = false }
 
 [profile.release]
 strip = true

@@ -29,10 +29,10 @@ use vetis::{
     listener::ListenerConfig,
     security::SecurityConfig,
     server::{Protocol, ServerConfig},
-    virtual_host::{handler_fn, VirtualHostConfig},
+    virtual_host::{handler_fn, HostConfig},
 };
 use vetis_smol::{
-    virtual_host::{path::HandlerPath, VirtualHostImpl},
+    virtual_host::{path::HandlerPath, Host},
     Vetis,
 };
 
@@ -60,14 +60,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .key_from_bytes(SERVER_KEY.to_vec())
         .build()?;
 
-    let localhost_config = VirtualHostConfig::builder()
+    let localhost_config = HostConfig::builder()
         .hostname("localhost")
         .port(8443)
         .security(security_config)
         .root_directory("/home/rogerio/Downloads")
         .build()?;
 
-    let mut localhost_virtual_host = VirtualHostImpl::new(localhost_config);
+    let mut localhost_virtual_host = Host::new(localhost_config);
 
     let root_path = HandlerPath::builder()
         .uri("/hello")

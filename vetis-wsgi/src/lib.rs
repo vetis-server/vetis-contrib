@@ -12,7 +12,7 @@ use pyo3::{
 use std::{ffi::CString, fs, future::Future, path::Path, pin::Pin, sync::Arc};
 use tokio::task::spawn_blocking;
 use vetis::{
-    errors::{VetisError, VirtualHostError},
+    errors::{VetisError, HostError},
     Request, Response,
 };
 
@@ -40,7 +40,7 @@ impl WsgiWorker {
             Ok(code) => code,
             Err(e) => {
                 error!("Failed to read script from file: {}", e);
-                return Err(VetisError::VirtualHost(VirtualHostError::Interface(e.to_string())));
+                return Err(VetisError::Host(HostError::Interface(e.to_string())));
             }
         };
 
@@ -49,7 +49,7 @@ impl WsgiWorker {
             Ok(code) => code,
             Err(e) => {
                 error!("Failed to initialize script: {}", e);
-                return Err(VetisError::VirtualHost(VirtualHostError::Interface(e.to_string())));
+                return Err(VetisError::Host(HostError::Interface(e.to_string())));
             }
         };
 
@@ -155,7 +155,7 @@ impl InterfaceWorker for WsgiWorker {
                 Ok(body) => body,
                 Err(e) => {
                     error!("Failed to run script: {}", e);
-                    return Err(VetisError::VirtualHost(VirtualHostError::Interface(
+                    return Err(VetisError::Host(HostError::Interface(
                         e.to_string(),
                     )));
                 }
@@ -166,7 +166,7 @@ impl InterfaceWorker for WsgiWorker {
                 Ok(data) => data,
                 Err(e) => {
                     error!("Failed to run script: {}", e);
-                    return Err(VetisError::VirtualHost(VirtualHostError::Interface(
+                    return Err(VetisError::Host(HostError::Interface(
                         e.to_string(),
                     )));
                 }
@@ -178,7 +178,7 @@ impl InterfaceWorker for WsgiWorker {
             {
                 Some(str) => str,
                 None => {
-                    return Err(VetisError::VirtualHost(VirtualHostError::Interface(
+                    return Err(VetisError::Host(HostError::Interface(
                         "Invalid status message".to_string(),
                     )));
                 }
@@ -187,7 +187,7 @@ impl InterfaceWorker for WsgiWorker {
             let status_code = match status_str.parse::<StatusCode>() {
                 Ok(code) => code,
                 Err(_) => {
-                    return Err(VetisError::VirtualHost(VirtualHostError::Interface(
+                    return Err(VetisError::Host(HostError::Interface(
                         "Invalid status code".to_string(),
                     )));
                 }
@@ -211,7 +211,7 @@ impl InterfaceWorker for WsgiWorker {
                     .body(HttpBody::from_bytes(&body))),
                 Err(e) => {
                     error!("Failed to run script: {}", e);
-                    Err(VetisError::VirtualHost(VirtualHostError::Interface(e.to_string())))
+                    Err(VetisError::Host(HostError::Interface(e.to_string())))
                 }
             }
         })

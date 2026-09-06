@@ -5,7 +5,7 @@ use hyper_body_utils::HttpBody;
 use log::error;
 use std::{collections::HashMap, fs, future::Future, path::Path, pin::Pin, sync::Arc};
 use vetis::{
-    errors::{VetisError, VirtualHostError},
+    errors::{VetisError, HostError},
     Request, Response,
 };
 
@@ -32,7 +32,7 @@ impl FcgiWorker {
             Ok(code) => code,
             Err(e) => {
                 error!("Failed to read script from file: {}", e);
-                return Err(VetisError::VirtualHost(VirtualHostError::Interface(e.to_string())));
+                return Err(VetisError::Host(HostError::Interface(e.to_string())));
             }
         };
         Ok(FcgiWorker { params: Arc::new(params), script: Arc::new(code) })

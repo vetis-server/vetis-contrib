@@ -4,14 +4,15 @@ use deboa_tokio::{client::http::conn::pool::HttpConnectionPool, Client};
 use once_cell::sync::Lazy;
 use std::{future::Future, pin::Pin, sync::Arc};
 use vetis::{
-    errors::{VetisError, VirtualHostError},
-    virtual_host::path::Path,
+    errors::{HostError, VetisError},
+    host::path::Path,
     Request, Response,
 };
 
 static CLIENT: Lazy<Client> = Lazy::new(|| {
     Client::builder()
         .connection_pool(HttpConnectionPool::default())
+        .prior_knowledge(true)
         .build()
 });
 
@@ -68,9 +69,7 @@ impl Path for ProxyPath {
             let target_url = format!("{}{}", target, uri);
             let deboa_request = match DeboaRequest::at(target_url, request_parts.method) {
                 Ok(request) => request,
-                Err(e) => {
-                    return Err(VetisError::VirtualHost(VirtualHostError::Proxy(e.to_string())))
-                }
+                Err(e) => return Err(VetisError::Host(HostError::Proxy(e.to_string()))),
             };
 
             let deboa_request = match deboa_request
@@ -80,9 +79,7 @@ impl Path for ProxyPath {
                 .build()
             {
                 Ok(request) => request,
-                Err(e) => {
-                    return Err(VetisError::VirtualHost(VirtualHostError::Proxy(e.to_string())))
-                }
+                Err(e) => return Err(VetisError::Host(HostError::Proxy(e.to_string()))),
             };
 
             // TODO: Check errors and handle them properly by returning a proper response 500, 503 or 504
@@ -92,9 +89,7 @@ impl Path for ProxyPath {
 
             let response = match response {
                 Ok(response) => response,
-                Err(e) => {
-                    return Err(VetisError::VirtualHost(VirtualHostError::Proxy(e.to_string())))
-                }
+                Err(e) => return Err(VetisError::Host(HostError::Proxy(e.to_string()))),
             };
 
             let (response_parts, response_body) = response.into_parts();

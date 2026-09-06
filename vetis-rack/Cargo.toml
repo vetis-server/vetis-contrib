@@ -16,12 +16,12 @@ rust-version.workspace = true
 default = []
 
 [dependencies]
-http = "1.4.0"
-hyper-body-utils = { version = "0.1.7", default-features = false }
-log = "0.4.29"
+http.workspace = true
+hyper-body-utils.workspace = true
+log.workspace = true
 magnus = { version = "0.8.2" }
-vetis = { version = "0.1.4-beta.8" }
-vetis-tokio = { version = "0.1.0-beta.3" }
+vetis = { path = "../../vetis/vetis" }
+vetis-tokio = { path = "../../vetis-tokio", optional = true, default-features = false }
 
 [target.'cfg(target_env = "musl")'.dependencies]
 bindgen = { version = "*", optional = true, default-features = false, features = [

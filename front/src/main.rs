@@ -1,12 +1,13 @@
 use clap::Parser;
 use http::Version;
-use std::error::Error;
-use terminal_link::Link;
-use vetis::{
-    listener::ListenerConfig, server::ServerConfig, virtual_host::VirtualHostConfig, VetisServer,
+use std::{
+    error::Error,
+    net::{IpAddr, Ipv4Addr},
 };
+use terminal_link::Link;
+use vetis::{host::HostConfig, listener::ListenerConfig, VetisServer};
 use vetis_static::{tokio::StaticPath, StaticPathConfig};
-use vetis_tokio::{virtual_host::VirtualHostImpl, Vetis};
+use vetis_tokio::{host::Host, listener::build_listeners, Vetis};
 
 #[derive(Parser)]
 #[command(
@@ -61,21 +62,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let listener = ListenerConfig::builder()
         .port(port)
-        .protocol_version(Version::HTTP_11)
-        .interface(&interface)
+        .protos(vec![Version::HTTP_11])
+        .interface(
+            interface
+                .parse()
+                .unwrap(),
+        )
         .build()?;
 
-    let config = ServerConfig::builder()
-        .add_listener(listener)
-        .build()?;
-
-    let host_config = VirtualHostConfig::builder()
+    let host_config = HostConfig::builder()
         .hostname("localhost")
-        .port(port)
-        .root_directory(root)
+        .bind_addresses(vec![(IpAddr::V4(Ipv4Addr::UNSPECIFIED), port)])
+        .root_directory(root.into())
         .build()?;
 
-    let mut virtual_host = VirtualHostImpl::new(host_config);
+    let mut virtual_host = Host::new(host_config);
     virtual_host.add_path(StaticPath::new(
         StaticPathConfig::builder()
             .uri("/")
@@ -85,10 +86,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .build()?,
     ));
 
-    let mut server = Vetis::new(config);
-    server
-        .add_virtual_host(virtual_host)
-        .await;
+    let mut server = Vetis::builder()
+        .add_listeners(build_listeners(listener))?
+        .add_host(virtual_host)?
+        .build();
 
     println!(
         "front is serving {} on {}\n",

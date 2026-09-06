@@ -8,7 +8,7 @@ use std::{fs, future::Future, path::Path, pin::Pin, sync::Arc};
 use tokio::task::spawn_blocking;
 use vetis::{
     Request, Response,
-    errors::{VetisError, VirtualHostError},
+    errors::{VetisError, HostError},
 };
 
 mod tests;
@@ -29,7 +29,7 @@ impl SapiWorker {
             Ok(code) => code,
             Err(e) => {
                 error!("Failed to read script from file: {}", e);
-                return Err(VetisError::VirtualHost(VirtualHostError::Interface(e.to_string())));
+                return Err(VetisError::Host(HostError::Interface(e.to_string())));
             }
         };
         Ok(SapiWorker { php: Arc::new(php), code: Arc::new(code) })
@@ -61,7 +61,7 @@ impl InterfaceWorker for SapiWorker {
                     Ok(exec) => exec,
                     Err(e) => {
                         error!("Failed to build request: {}", e);
-                        return Err(VetisError::VirtualHost(VirtualHostError::Interface(
+                        return Err(VetisError::Host(HostError::Interface(
                             e.to_string(),
                         )));
                     }
@@ -74,13 +74,13 @@ impl InterfaceWorker for SapiWorker {
                             Ok(status) => Ok(Response::builder()
                                 .status(status)
                                 .body(HttpBody::from_bytes(&body))),
-                            Err(e) => Err(VetisError::VirtualHost(VirtualHostError::Interface(
+                            Err(e) => Err(VetisError::Host(HostError::Interface(
                                 e.to_string(),
                             ))),
                         }
                     }
                     Err(e) => {
-                        Err(VetisError::VirtualHost(VirtualHostError::Interface(e.to_string())))
+                        Err(VetisError::Host(HostError::Interface(e.to_string())))
                     }
                 }
             })
@@ -88,7 +88,7 @@ impl InterfaceWorker for SapiWorker {
 
             match result {
                 Ok(result) => result,
-                Err(e) => Err(VetisError::VirtualHost(VirtualHostError::Interface(e.to_string()))),
+                Err(e) => Err(VetisError::Host(HostError::Interface(e.to_string()))),
             }
         })
         */

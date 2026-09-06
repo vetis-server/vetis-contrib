@@ -16,9 +16,9 @@ rust-version.workspace = true
 default = []
 
 [dependencies]
-fastcgi-client = { version = "0.11.1" }
-http = "1.4.0"
-hyper-body-utils = { version = "0.1.7", default-features = false }
-log = "0.4.29"
-vetis = { version = "0.1.4-beta.8" }
-vetis-tokio = { version = "0.1.0-beta.3" }
+fastcgi-client = { version = "0.12.0" }
+http.workspace = true
+hyper-body-utils.workspace = true
+log.workspace = true
+vetis = { path = "../../vetis/vetis" }
+vetis-tokio = { path = "../../vetis-tokio", optional = true, default-features = false }

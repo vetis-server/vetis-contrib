@@ -10,7 +10,7 @@ use std::os::unix::fs::MetadataExt;
 use std::os::windows::fs::MetadataExt;
 use std::{future::Future, path::PathBuf, pin::Pin, sync::Arc};
 use vetis::{
-    errors::{FileError, VetisError, VirtualHostError},
+    errors::{FileError, VetisError, HostError},
     virtual_host::path::Path,
     Request, Response, VetisResult,
 };
@@ -81,7 +81,7 @@ impl StaticPath {
                     Ok(metadata) => metadata,
                     Err(e) => {
                         error!("Error getting metadata for file {:?}: {}", file_path, e);
-                        return Err(VetisError::VirtualHost(VirtualHostError::File(
+                        return Err(VetisError::Host(HostError::File(
                             FileError::NotFound,
                         )));
                     }
@@ -125,7 +125,7 @@ impl StaticPath {
                     if let Ok(data) = data {
                         StaticFile::Data { data, metadata }
                     } else {
-                        return Err(VetisError::VirtualHost(VirtualHostError::File(
+                        return Err(VetisError::Host(HostError::File(
                             FileError::NotFound,
                         )));
                     }
@@ -137,7 +137,7 @@ impl StaticPath {
             }
             Err(e) => {
                 error!("Error opening file {}: {}", path, e);
-                Err(VetisError::VirtualHost(VirtualHostError::File(FileError::NotFound)))
+                Err(VetisError::Host(HostError::File(FileError::NotFound)))
             }
         };
 
@@ -160,7 +160,7 @@ impl StaticPath {
         if let Some(range) = range {
             let range_info = match range
                 .split_once("=")
-                .ok_or(VetisError::VirtualHost(VirtualHostError::File(FileError::InvalidRange)))
+                .ok_or(VetisError::Host(HostError::File(FileError::InvalidRange)))
             {
                 Ok(info) => info,
                 Err(e) => return Err(e),
@@ -168,23 +168,23 @@ impl StaticPath {
 
             let (unit, range) = range_info;
             if unit != "bytes" {
-                return Err(VetisError::VirtualHost(VirtualHostError::File(
+                return Err(VetisError::Host(HostError::File(
                     FileError::InvalidRange,
                 )));
             }
 
             let (start, end) = range
                 .split_once("-")
-                .ok_or(VetisError::VirtualHost(VirtualHostError::File(FileError::InvalidRange)))?;
+                .ok_or(VetisError::Host(HostError::File(FileError::InvalidRange)))?;
             let start = start
                 .parse::<u64>()
                 .map_err(|_| {
-                    VetisError::VirtualHost(VirtualHostError::File(FileError::InvalidRange))
+                    VetisError::Host(HostError::File(FileError::InvalidRange))
                 })?;
             let end = end
                 .parse::<u64>()
                 .map_err(|_| {
-                    VetisError::VirtualHost(VirtualHostError::File(FileError::InvalidRange))
+                    VetisError::Host(HostError::File(FileError::InvalidRange))
                 })?;
             if start > end || start >= filesize {
                 return Ok(Response::builder()
@@ -235,7 +235,7 @@ impl StaticPath {
             http::header::LAST_MODIFIED,
             date.parse()
                 .map_err(|_| {
-                    VetisError::VirtualHost(VirtualHostError::File(FileError::InvalidMetadata))
+                    VetisError::Host(HostError::File(FileError::InvalidMetadata))
                 })?,
         );
 
@@ -246,7 +246,7 @@ impl StaticPath {
             headers.insert(
                 http::header::CONTENT_TYPE,
                 HeaderValue::from_str(mime_type).map_err(|_| {
-                    VetisError::VirtualHost(VirtualHostError::File(FileError::InvalidMetadata))
+                    VetisError::Host(HostError::File(FileError::InvalidMetadata))
                 })?,
             );
         }
@@ -268,7 +268,7 @@ impl StaticPath {
             }
             None => {
                 println!("No index file configured");
-                Err(VetisError::VirtualHost(VirtualHostError::File(FileError::NotFound)))
+                Err(VetisError::Host(HostError::File(FileError::NotFound)))
             }
         }
     }
@@ -318,7 +318,7 @@ impl Path for StaticPath {
                 if !file.exists() {
                     if let Ok(ext_regex) = ext_regex {
                         if !ext_regex.is_match(uri.as_ref()) {
-                            return Err(VetisError::VirtualHost(VirtualHostError::File(
+                            return Err(VetisError::Host(HostError::File(
                                 FileError::NotFound,
                             )));
                         }
@@ -329,7 +329,7 @@ impl Path for StaticPath {
                         .await;
                 }
             } else if !file.exists() {
-                return Err(VetisError::VirtualHost(VirtualHostError::File(FileError::NotFound)));
+                return Err(VetisError::Host(HostError::File(FileError::NotFound)));
             }
 
             if request.method() == http::Method::HEAD {

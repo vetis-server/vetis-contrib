@@ -1,6 +1,6 @@
 [package]
 name = "vetis-static"
-version = "0.1.0"
+version = "0.1.1-beta.1"
 edition.workspace = true
 authors.workspace = true
 repository.workspace = true
@@ -14,18 +14,15 @@ rust-version.workspace = true
 
 [features]
 default = ["runtime-tokio"]
-runtime-compio = [
-  "vetis-compio/http1",
-  "vetis-compio/rust-tls",
-  "dep:compio",
-]
-runtime-smol = [
-  "vetis-smol/http1",
-  "vetis-smol/rust-tls",
-  "dep:smol"
-]
+# runtime-compio = [
+#   "vetis-compio/rust-tls",
+#   "dep:compio",
+# ]
+# runtime-smol = [
+#   "vetis-smol/rust-tls",
+#   "dep:smol"
+# ]
 runtime-tokio = [
-  "vetis-tokio/http1",
   "vetis-tokio/rust-tls",
   "dep:tokio"
 ]
@@ -33,9 +30,9 @@ runtime-tokio = [
 [dependencies]
 compio = { version = "0.19.2", optional = true, default-features = false }
 duration-str = "0.21.0"
-http = "1.4.2"
-hyper-body-utils = "0.1.7"
-log = "0.4.33"
+http.workspace = true
+hyper-body-utils.workspace = true
+log.workspace = true
 minimime = "1.0.0"
 regex = "1.12.4"
 smol = { version = "2.0.2", optional = true, default-features = false }
@@ -44,33 +41,33 @@ serde = { version = "1.0.228", features = ["derive"] }
 time = "0.3.55"
 tokio = { version = "1.52.3", optional = true, default-features = false }
 typetag = "0.2.21"
-vetis = { version = "0.1.4" }
-vetis-compio = { version = "0.1.0", optional = true, default-features = false }
-vetis-smol = { version = "0.1.0", optional = true, default-features = false }
-vetis-tokio = { version = "0.1.0", optional = true, default-features = false }
+vetis.workspace = true
+#vetis-compio = { version = "0.1.0", optional = true, default-features = false }
+#vetis-smol = { version = "0.1.0", optional = true, default-features = false }
+vetis-tokio = { workspace = true, optional = true, default-features = false }
 
 [dev-dependencies]
-caramelo = "0.1.0"
+caramelo = "0.1.4"
 compio = { version = "0.19.2", default-features = false }
-deboa = { version = "0.1.0" }
-deboa-compio = { version = "0.1.1", default-features = false, features = [
-  "http1",
-  "rust-tls",
-  "default-rustls-provider",
-  "default-rustls-verifier",
-] }
-deboa-smol = { version = "0.1.1", default-features = false, features = [
-  "http1",
-  "rust-tls",
-  "default-rustls-provider",
-  "default-rustls-verifier",
-] }
-deboa-tokio = { version = "0.1.1", default-features = false, features = [
-  "http1",
+deboa.workspace = true
+# deboa-compio = { version = "0.1.1", default-features = false, features = [
+#   "http2",
+#   "rust-tls",
+#   "default-rustls-provider",
+#   "default-rustls-verifier",
+# ] }
+# deboa-smol = { version = "0.1.1", default-features = false, features = [
+#   "http2",
+#   "rust-tls",
+#   "default-rustls-provider",
+#   "default-rustls-verifier",
+# ] }
+deboa-tokio = { workspace = true, default-features = false, features = [
+  "http2",
   "rust-tls",
   "default-rustls-provider",
   "default-rustls-verifier",
 ] }
 smol = { version = "2.0.2", default-features = false }
 tokio = { version = "1.52.3", default-features = false, features = ["macros"] }
-vetis-macros = { version = "0.1.1" }
+vetis-macros = { version = "0.1.3-beta.1" }
