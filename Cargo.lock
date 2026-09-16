@@ -90,12 +90,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "arcshift"
-version = "0.4.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed00e6d5ac3ff26dc77b7733e37e364e5178a0e529487a74b4a4e013f18ce3e3"
-
-[[package]]
 name = "arrayvec"
 version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -864,7 +858,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2176,7 +2170,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2291,7 +2285,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b55fb86dfd3a2f5f76ea78310a88f96c4ea21a3031f8d212443d56123fd0521"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2912,13 +2906,10 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "vetis"
-version = "0.1.7-beta.2"
+version = "0.1.7-beta.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de08965e87aaa935953d5a99f12851c7df47483b1e149b24fba8a6e585452d90"
+checksum = "67903710bdfa6d6658e13bceb58ae44be199bdc09f625fe7d35a7f83c8254132"
 dependencies = [
- "arc-swap",
- "arcshift",
- "async-lock",
  "bytes",
  "futures-util",
  "http",
@@ -2941,9 +2932,9 @@ dependencies = [
 
 [[package]]
 name = "vetis-macros"
-version = "0.1.3-beta.2"
+version = "0.1.3-beta.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "152041e1bd77831e9705b4efb1ed6a46e86049287ad27ad45ae7d38b72d8620e"
+checksum = "c6a9afaaca4b4d1d9c932a59dde007f57aae9481893311664cbd020bb1bfda9a"
 dependencies = [
  "proc-macro2",
  "quote",
