@@ -1,13 +1,12 @@
 use clap::Parser;
-use http::Version;
 use std::{
     error::Error,
     net::{IpAddr, Ipv4Addr},
 };
-use terminal_link::Link;
-use vetis::{host::HostConfig, listener::ListenerConfig, VetisServer};
-use vetis_static::{tokio::StaticPath, StaticPathConfig};
-use vetis_tokio::{host::Host, listener::build_listeners, Vetis};
+use tracing_subscriber::{filter::LevelFilter, fmt::format};
+use vetis::{VetisServer, host::HostConfig};
+use vetis_static::{StaticPathConfig, tokio::StaticPath};
+use vetis_tokio::{Vetis, host::Host};
 
 #[derive(Parser)]
 #[command(
@@ -46,37 +45,26 @@ struct Args {
 async fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
 
-    env_logger::Builder::from_env(env_logger::Env::default().filter_or("RUST_LOG", "info"))
-        .format_module_path(false)
+    tracing_subscriber::FmtSubscriber::builder()
+        .with_max_level(LevelFilter::DEBUG)
+        .event_format(format().compact())
+        .with_target(false)
         .init();
 
     let root = &args
         .root
         .unwrap_or(".".to_string());
-    let interface = args
-        .interface
-        .unwrap_or("0.0.0.0".to_string());
     let port = args
         .port
         .unwrap_or(4444);
 
-    let listener = ListenerConfig::builder()
-        .port(port)
-        .protos(vec![Version::HTTP_11])
-        .interface(
-            interface
-                .parse()
-                .unwrap(),
-        )
-        .build()?;
-
     let host_config = HostConfig::builder()
         .hostname("localhost")
-        .bind_addresses(vec![(IpAddr::V4(Ipv4Addr::UNSPECIFIED), port)])
-        .root_directory(root.into())
+        .bind_addresses(&[(IpAddr::V4(Ipv4Addr::UNSPECIFIED), port)])
+        .root_directory(root)
         .build()?;
 
-    let mut virtual_host = Host::new(host_config);
+    let mut virtual_host = Host::new(host_config).await?;
     virtual_host.add_path(StaticPath::new(
         StaticPathConfig::builder()
             .uri("/")
@@ -87,15 +75,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     ));
 
     let mut server = Vetis::builder()
-        .add_listeners(build_listeners(listener))?
-        .add_host(virtual_host)?
+        .add_host(virtual_host)
+        .await?
         .build();
-
-    println!(
-        "front is serving {} on {}\n",
-        root,
-        Link::new(&format!("http://localhost:{}", port), &format!("http://localhost:{}", port))
-    );
 
     server.run().await?;
 

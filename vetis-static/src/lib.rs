@@ -1,15 +1,16 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
+use crate::tokio::StaticPath;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::{
     path::PathBuf,
     time::{Duration, SystemTime},
 };
-use time::{format_description::well_known::Rfc2822, OffsetDateTime};
+use time::{OffsetDateTime, format_description::well_known::Rfc2822};
 use vetis::{
-    errors::{ConfigError, VetisError},
-    host::path::PathConfig,
     VetisResult,
+    errors::{ConfigError, VetisError},
+    host::path::{Path, PathConfig},
 };
 
 //pub(crate) type VetisFileCache = Cache<String, StaticFile>;
@@ -50,20 +51,12 @@ pub fn format_date(date: SystemTime) -> String {
 }
 
 /// Builder for creating `StaticPathCache` instances.
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug)]
 pub struct StaticPathCacheBuilder {
-    uri: String,
     max_file_size: usize,
     ttl: Duration,
     tti: Duration,
     capacity: u64,
-}
-
-#[typetag::serde]
-impl PathConfig for StaticPathCacheBuilder {
-    fn uri(&mut self, value: &str) {
-        self.uri = value.to_string();
-    }
 }
 
 impl StaticPathCacheBuilder {
@@ -129,7 +122,6 @@ impl StaticPathCache {
     /// Create a new builder for `StaticPathCache`.
     pub fn builder() -> StaticPathCacheBuilder {
         StaticPathCacheBuilder {
-            uri: String::new(),
             max_file_size: MAX_FILE_SIZE,
             ttl: DEFAULT_TTL,
             tti: DEFAULT_TTI,
@@ -264,10 +256,22 @@ pub struct StaticPathConfig {
     cache: Option<StaticPathCache>,
 }
 
-#[typetag::serde]
+#[typetag::serde(name = "static_path")]
 impl PathConfig for StaticPathConfig {
     fn uri(&mut self, uri: &str) {
         self.uri = uri.to_string();
+    }
+
+    fn boxed_clone(&self) -> Box<dyn PathConfig> {
+        Box::new(self.clone())
+    }
+
+    fn boxed_path(&self) -> Box<dyn Path> {
+        Box::new(StaticPath::new(self.clone()))
+    }
+
+    fn boxed_sync(&self) -> Box<dyn Path + Send + Sync> {
+        Box::new(StaticPath::new(self.clone()))
     }
 }
 

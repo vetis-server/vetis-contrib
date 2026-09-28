@@ -1,12 +1,11 @@
-use crate::ProxyPathConfig;
-use deboa::{request::DeboaRequest, HttpClient as _};
-use deboa_tokio::{client::http::conn::pool::HttpConnectionPool, Client};
+use crate::ReverseProxyPathConfig;
+use deboa::{HttpClient as _, request::DeboaRequest};
+use deboa_tokio::{Client, client::http::conn::pool::HttpConnectionPool};
 use once_cell::sync::Lazy;
-use std::{future::Future, pin::Pin, sync::Arc};
 use vetis::{
+    Request, Response, VetisFutureResult,
     errors::{HostError, VetisError},
-    host::path::Path,
-    Request, Response,
+    host::{HostContext, path::Path},
 };
 
 static CLIENT: Lazy<Client> = Lazy::new(|| {
@@ -17,11 +16,11 @@ static CLIENT: Lazy<Client> = Lazy::new(|| {
 });
 
 /// Proxy path
-pub struct ProxyPath {
-    config: ProxyPathConfig,
+pub struct ReveseProxyPath {
+    config: ReverseProxyPathConfig,
 }
 
-impl ProxyPath {
+impl ReveseProxyPath {
     /// Create a new proxy path with provided configuration
     ///
     /// # Arguments
@@ -31,12 +30,12 @@ impl ProxyPath {
     /// # Returns
     ///
     /// * `ProxyPath` - The proxy path
-    pub fn new(config: ProxyPathConfig) -> ProxyPath {
-        ProxyPath { config }
+    pub fn new(config: ReverseProxyPathConfig) -> ReveseProxyPath {
+        ReveseProxyPath { config }
     }
 }
 
-impl Path for ProxyPath {
+impl Path for ReveseProxyPath {
     /// Get the URI of the proxy path
     ///
     /// # Returns
@@ -59,14 +58,14 @@ impl Path for ProxyPath {
     fn handle<'a>(
         &'a self,
         request: Request,
-        uri: Arc<String>,
-    ) -> Pin<Box<dyn Future<Output = Result<Response, VetisError>> + Send + 'a>> {
+        host_context: HostContext,
+    ) -> VetisFutureResult<'a, Response> {
         let (request_parts, request_body) = request.into_parts();
 
         let target = self.config.target();
 
         Box::pin(async move {
-            let target_url = format!("{}{}", target, uri);
+            let target_url = format!("{}{}", target, host_context.path_uri());
             let deboa_request = match DeboaRequest::at(target_url, request_parts.method) {
                 Ok(request) => request,
                 Err(e) => return Err(VetisError::Host(HostError::Proxy(e.to_string()))),

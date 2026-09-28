@@ -6,52 +6,33 @@ use deboa::{
 use deboa_tokio::cert::DeboaCertificate;
 use http::{StatusCode, Version};
 use http_body_util::BodyExt as _;
-use std::error::Error;
-use vetis::{host::Host as _, Response, VetisServer as _};
-use vetis_rev_proxy::{tokio::ProxyPath, ProxyPathConfig};
+use tokio::fs;
+use vetis::{Response, VetisServer as _, VetisTestResult, host::Host as _};
+use vetis_rev_proxy::{ReverseProxyPathConfig, tokio::ReveseProxyPath};
 use vetis_tokio::{
-    handler_fn,
-    host::{path::HandlerPath, Host},
-    listener::build_listeners,
-    HostConfig, ListenerConfig, SecurityConfig, Vetis,
+    HostConfig, TlsConfig, Vetis,
+    host::{
+        Host,
+        path::{HandlerPath, handler_fn},
+    },
 };
 
 use crate::common::{CA_CERT, SERVER_CERT, SERVER_KEY};
 
 #[tokio::test]
-async fn test_get_proxy_to_target() -> Result<(), Box<dyn Error>> {
-    let source_listener = ListenerConfig::builder()
-        .port(8084)
-        .protos(vec![Version::HTTP_11])
-        .interface(
-            "0.0.0.0"
-                .parse()
-                .unwrap(),
-        )
-        .build()?;
-
-    let target_listener = ListenerConfig::builder()
-        .port(8085)
-        .protos(vec![Version::HTTP_11])
-        .interface(
-            "0.0.0.0"
-                .parse()
-                .unwrap(),
-        )
-        .allow_unsafe_connections(true)
-        .build()?;
-
-    let security_config = SecurityConfig::builder()
-        .ca_cert_from_bytes(CA_CERT.to_vec())
-        .cert_from_bytes(SERVER_CERT.to_vec())
-        .key_from_bytes(SERVER_KEY.to_vec())
+async fn test_get_proxy_to_target() -> VetisTestResult<()> {
+    let security_config = TlsConfig::builder()
+        .ca_file(CA_CERT)
+        .cert_file(SERVER_CERT)
+        .key_file(SERVER_KEY)
         .build()?;
 
     let source_host_config = HostConfig::builder()
         .hostname("localhost")
-        .root_directory("src/tests".into())
-        .security(security_config.clone())
-        .bind_addresses(vec![(
+        .root_directory("..")
+        .protos(&[Version::HTTP_11])
+        .tls(security_config)
+        .bind_addresses(&[(
             "0.0.0.0"
                 .parse()
                 .unwrap(),
@@ -59,9 +40,9 @@ async fn test_get_proxy_to_target() -> Result<(), Box<dyn Error>> {
         )])
         .build()?;
 
-    let mut source_host = Host::new(source_host_config);
-    source_host.add_path(ProxyPath::new(
-        ProxyPathConfig::builder()
+    let mut source_host = Host::new(source_host_config).await?;
+    source_host.add_path(ReveseProxyPath::new(
+        ReverseProxyPathConfig::builder()
             .uri("/")
             .target("http://localhost:8085")
             .build()?,
@@ -69,8 +50,8 @@ async fn test_get_proxy_to_target() -> Result<(), Box<dyn Error>> {
 
     let target_host_config = HostConfig::builder()
         .hostname("localhost")
-        .root_directory("src/tests".into())
-        .bind_addresses(vec![(
+        .root_directory("..")
+        .bind_addresses(&[(
             "0.0.0.0"
                 .parse()
                 .unwrap(),
@@ -78,11 +59,11 @@ async fn test_get_proxy_to_target() -> Result<(), Box<dyn Error>> {
         )])
         .build()?;
 
-    let mut target_host = Host::new(target_host_config);
+    let mut target_host = Host::new(target_host_config).await?;
     target_host.add_path(
         HandlerPath::builder()
             .uri("/")
-            .handler(handler_fn(|_request| async move {
+            .handler(handler_fn(|_req, _ctx| async move {
                 Ok(Response::builder()
                     .status(StatusCode::OK)
                     .text("Hello, world!"))
@@ -98,18 +79,19 @@ async fn test_get_proxy_to_target() -> Result<(), Box<dyn Error>> {
     );
 
     let mut server = Vetis::builder()
-        .add_listeners(build_listeners(source_listener))?
-        .add_listeners(build_listeners(target_listener))?
-        .add_host(source_host)?
-        .add_host(target_host)?
+        .add_host(source_host)
+        .await?
+        .add_host(target_host)
+        .await?
         .build();
 
     server
         .start()
         .await?;
 
+    let cert = fs::read(format!("../{CA_CERT}")).await?;
     let client = deboa_tokio::Client::builder()
-        .certificate(DeboaCertificate::from_slice(CA_CERT, ContentEncoding::DER))
+        .certificate(DeboaCertificate::from_slice(&cert, ContentEncoding::DER))
         .prior_knowledge(true)
         .build();
 
@@ -134,39 +116,19 @@ async fn test_get_proxy_to_target() -> Result<(), Box<dyn Error>> {
 }
 
 #[tokio::test]
-async fn test_post_proxy_to_target() -> Result<(), Box<dyn Error>> {
-    let source_listener = ListenerConfig::builder()
-        .port(9093)
-        .protos(vec![Version::HTTP_11])
-        .interface(
-            "0.0.0.0"
-                .parse()
-                .unwrap(),
-        )
-        .build()?;
-
-    let target_listener = ListenerConfig::builder()
-        .port(9094)
-        .protos(vec![Version::HTTP_11])
-        .interface(
-            "0.0.0.0"
-                .parse()
-                .unwrap(),
-        )
-        .allow_unsafe_connections(true)
-        .build()?;
-
-    let security_config = SecurityConfig::builder()
-        .ca_cert_from_bytes(CA_CERT.to_vec())
-        .cert_from_bytes(SERVER_CERT.to_vec())
-        .key_from_bytes(SERVER_KEY.to_vec())
+async fn test_post_proxy_to_target() -> VetisTestResult<()> {
+    let security_config = TlsConfig::builder()
+        .ca_file(CA_CERT)
+        .cert_file(SERVER_CERT)
+        .key_file(SERVER_KEY)
         .build()?;
 
     let source_host_config = HostConfig::builder()
         .hostname("localhost")
-        .root_directory("src/tests".into())
-        .security(security_config.clone())
-        .bind_addresses(vec![(
+        .root_directory("..")
+        .protos(&[Version::HTTP_11])
+        .tls(security_config.clone())
+        .bind_addresses(&[(
             "0.0.0.0"
                 .parse()
                 .unwrap(),
@@ -174,9 +136,9 @@ async fn test_post_proxy_to_target() -> Result<(), Box<dyn Error>> {
         )])
         .build()?;
 
-    let mut source_host = Host::new(source_host_config);
-    source_host.add_path(ProxyPath::new(
-        ProxyPathConfig::builder()
+    let mut source_host = Host::new(source_host_config).await?;
+    source_host.add_path(ReveseProxyPath::new(
+        ReverseProxyPathConfig::builder()
             .uri("/")
             .target("http://localhost:9094")
             .build()?,
@@ -184,8 +146,8 @@ async fn test_post_proxy_to_target() -> Result<(), Box<dyn Error>> {
 
     let target_host_config = HostConfig::builder()
         .hostname("localhost")
-        .root_directory("src/tests".into())
-        .bind_addresses(vec![(
+        .root_directory("..")
+        .bind_addresses(&[(
             "0.0.0.0"
                 .parse()
                 .unwrap(),
@@ -193,12 +155,12 @@ async fn test_post_proxy_to_target() -> Result<(), Box<dyn Error>> {
         )])
         .build()?;
 
-    let mut target_host = Host::new(target_host_config);
+    let mut target_host = Host::new(target_host_config).await?;
     target_host.add_path(
         HandlerPath::builder()
             .uri("/")
-            .handler(handler_fn(|request| async move {
-                let (_parts, body) = request.into_parts();
+            .handler(handler_fn(|req, _ctx| async move {
+                let (_parts, body) = req.into_parts();
                 let text = body
                     .collect()
                     .await
@@ -219,18 +181,19 @@ async fn test_post_proxy_to_target() -> Result<(), Box<dyn Error>> {
     );
 
     let mut server = Vetis::builder()
-        .add_listeners(build_listeners(source_listener))?
-        .add_listeners(build_listeners(target_listener))?
-        .add_host(source_host)?
-        .add_host(target_host)?
+        .add_host(source_host)
+        .await?
+        .add_host(target_host)
+        .await?
         .build();
 
     server
         .start()
         .await?;
 
+    let cert = fs::read(format!("../{CA_CERT}")).await?;
     let client = deboa_tokio::Client::builder()
-        .certificate(DeboaCertificate::from_slice(CA_CERT, ContentEncoding::DER))
+        .certificate(DeboaCertificate::from_slice(&cert, ContentEncoding::DER))
         .prior_knowledge(true)
         .build();
 

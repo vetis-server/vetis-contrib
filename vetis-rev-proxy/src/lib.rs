@@ -2,8 +2,8 @@
 #![deny(missing_docs)]
 use serde::Deserialize;
 use vetis::{
-    errors::{ConfigError, VetisError},
     VetisResult,
+    errors::{ConfigError, VetisError},
 };
 
 #[cfg(feature = "runtime-tokio")]
@@ -15,12 +15,12 @@ mod tests;
 
 /// Builder for creating `ProxyPathConfig` instances.
 #[derive(Deserialize)]
-pub struct ProxyPathConfigBuilder {
+pub struct ReverseProxyPathConfigBuilder {
     uri: String,
     target: String,
 }
 
-impl ProxyPathConfigBuilder {
+impl ReverseProxyPathConfigBuilder {
     /// Allow set the URI of the proxy path.
     ///
     /// # Returns
@@ -41,12 +41,12 @@ impl ProxyPathConfigBuilder {
         self
     }
 
-    /// Build the `ProxyPathConfig` with the configured settings.
+    /// Build the `ReverseProxyPathConfig` with the configured settings.
     ///
     /// # Returns
     ///
-    /// * `VetisResult<ProxyPathConfig>` - The `ProxyPathConfig` with the configured settings.
-    pub fn build(self) -> VetisResult<ProxyPathConfig> {
+    /// * `VetisResult<ReverseProxyPathConfig>` - The `ReverseProxyPathConfig` with the configured settings.
+    pub fn build(self) -> VetisResult<ReverseProxyPathConfig> {
         if self.uri.is_empty() {
             return Err(VetisError::Config(ConfigError::Path("URI cannot be empty".to_string())));
         }
@@ -59,13 +59,13 @@ impl ProxyPathConfigBuilder {
             )));
         }
 
-        Ok(ProxyPathConfig { uri: self.uri, target: self.target })
+        Ok(ReverseProxyPathConfig { uri: self.uri, target: self.target })
     }
 }
 
 /// Configuration for a proxy path.
 #[derive(Clone, Deserialize)]
-pub struct ProxyPathConfig {
+pub struct ReverseProxyPathConfig {
     uri: String,
     target: String,
     // TODO: Add custom proxy rules
@@ -73,14 +73,14 @@ pub struct ProxyPathConfig {
     // TODO: Add support for custom headers
 }
 
-impl ProxyPathConfig {
+impl ReverseProxyPathConfig {
     /// Creates a new `ProxyPathConfigBuilder` with default settings.
     ///
     /// # Returns
     ///
     /// * `ProxyPathConfigBuilder` - The builder.
-    pub fn builder() -> ProxyPathConfigBuilder {
-        ProxyPathConfigBuilder {
+    pub fn builder() -> ReverseProxyPathConfigBuilder {
+        ReverseProxyPathConfigBuilder {
             uri: "/test".to_string(),
             target: "http://localhost:8080".to_string(),
         }

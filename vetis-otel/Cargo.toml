@@ -1,0 +1,20 @@
+[package]
+name = "vetis-otel"
+version = "0.1.0-beta.1"
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Very Tiny Server Opentelemetry support"
+readme = "README.md"
+license.workspace = true
+keywords = ["http", "modules", "otel", "telemetry"]
+publish = true
+rust-version.workspace = true
+
+[dependencies]
+opentelemetry = { version = "0.33.0", optional = true }
+opentelemetry-otlp = { version = "0.33.0", optional = true }
+serde = { version = "1.0.228", features = ["derive"] }
+typetag.workspace = true
+vetis.workspace = true

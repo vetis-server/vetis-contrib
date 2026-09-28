@@ -1,10 +1,12 @@
-use crate::ProxyPathConfig;
-use std::error::Error;
-use vetis::errors::{ConfigError, VetisError};
+use crate::ReverseProxyPathConfig;
+use vetis::{
+    VetisTestResult,
+    errors::{ConfigError, VetisError},
+};
 
 #[test]
-fn test_proxy_path() -> Result<(), Box<dyn Error>> {
-    let some_path = ProxyPathConfig::builder()
+fn test_proxy_path() -> VetisTestResult<()> {
+    let some_path = ReverseProxyPathConfig::builder()
         .uri("/test")
         .target("http://localhost:8080")
         .build()?;
@@ -16,8 +18,8 @@ fn test_proxy_path() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_invalid_proxy_path() -> Result<(), Box<dyn Error>> {
-    let some_path = ProxyPathConfig::builder()
+fn test_invalid_proxy_path() -> VetisTestResult<()> {
+    let some_path = ReverseProxyPathConfig::builder()
         .uri("")
         .target("http://localhost:8080")
         .build();
@@ -32,8 +34,8 @@ fn test_invalid_proxy_path() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_invalid_proxy_path_target() -> Result<(), Box<dyn Error>> {
-    let some_path = ProxyPathConfig::builder()
+fn test_invalid_proxy_path_target() -> VetisTestResult<()> {
+    let some_path = ReverseProxyPathConfig::builder()
         .uri("/test")
         .target("")
         .build();

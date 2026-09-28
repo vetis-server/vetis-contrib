@@ -1,8 +1,11 @@
 use crate::StaticPathConfig;
-use vetis::errors::{ConfigError, VetisError};
+use vetis::{
+    VetisTestResult,
+    errors::{ConfigError, VetisError},
+};
 
 #[test]
-fn test_static_path_config() -> Result<(), Box<dyn std::error::Error>> {
+fn test_static_path_config() -> VetisTestResult<()> {
     let path_config = StaticPathConfig::builder()
         .uri("/test")
         .extensions(".html")

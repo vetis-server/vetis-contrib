@@ -1,0 +1,25 @@
+[package]
+name = "vetis-log"
+version = "0.1.0-beta.1"
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Very Tiny Server logging support"
+readme = "README.md"
+license.workspace = true
+keywords = ["http", "modules", "logging", "tracing"]
+publish = true
+rust-version.workspace = true
+
+[dependencies]
+log = { workspace = true, features = ["serde_core"] }
+logforth = { workspace = true, features = [
+    "append-syslog",
+    "append-file",
+    "bridge-log",
+    "layout-text",
+] }
+serde = { version = "1.0.229", features = ["derive"] }
+typetag = "0.2.21"
+vetis.workspace = true

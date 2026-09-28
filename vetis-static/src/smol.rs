@@ -18,7 +18,6 @@ use vetis::{
 pub struct StaticPath {
     config: StaticPathConfig,
     index_file: Option<String>,
-    //file_cache: VetisFileCache,
 }
 
 impl StaticPath {
@@ -32,19 +31,6 @@ impl StaticPath {
     ///
     /// * `StaticPath` - The static path
     pub fn new(config: StaticPathConfig) -> StaticPath {
-        /*
-        let file_cache = if let Some(cache) = config.cache() {
-            CacheBuilder::new(cache.capacity())
-                .time_to_idle(cache.tti())
-                .time_to_live(cache.ttl())
-        } else {
-            CacheBuilder::new(1000)
-                .time_to_idle(Duration::from_secs(60))
-                .time_to_live(Duration::from_secs(60))
-        }
-        .build();
-        */
-
         if let Some(index_files) = config.index_files() {
             let directory = PathBuf::from(config.directory());
             if let Some(index_file) = index_files
@@ -58,11 +44,10 @@ impl StaticPath {
                 return StaticPath {
                     config: config.clone(),
                     index_file: Some(index_file.to_string()),
-                    //file_cache,
                 };
             }
         }
-        StaticPath { config, index_file: None /*file_cache*/ }
+        StaticPath { config, index_file: None }
     }
 
     async fn cache_file(&self, file_path: &std::path::Path) -> VetisResult<StaticFile> {

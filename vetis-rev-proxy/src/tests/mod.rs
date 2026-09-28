@@ -1,10 +1,11 @@
-use crate::ProxyPathConfig;
+use crate::ReverseProxyPathConfig;
+use vetis::VetisTestResult;
 
 mod path;
 
 #[test]
-fn test_reverse_proxy_config() -> Result<(), Box<dyn std::error::Error>> {
-    let reverse_proxy_config = ProxyPathConfig::builder()
+fn test_reverse_proxy_config() -> VetisTestResult<()> {
+    let reverse_proxy_config = ReverseProxyPathConfig::builder()
         .uri("/")
         .target("http://localhost:8081")
         .build()?;

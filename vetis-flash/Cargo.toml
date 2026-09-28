@@ -1,53 +1,44 @@
 [package]
-name = "vetis-static"
-version = "0.1.1-beta.2"
+name = "vetis-flash"
+version = "0.1.1-beta.1"
 edition.workspace = true
 authors.workspace = true
 repository.workspace = true
 homepage.workspace = true
-description = "Very Tiny Server Static Files support"
+description = "Very Tiny Server Flash Static Content support"
 readme = "README.md"
 license.workspace = true
 keywords = ["http", "modules", "server", "rest-server"]
 publish = true
 rust-version.workspace = true
 
+[lib]
+crate-type = ["cdylib", "lib"]
+
 [features]
 default = ["runtime-tokio"]
-# runtime-compio = [
-#   "vetis-compio/rust-tls",
-#   "dep:compio",
-# ]
-# runtime-smol = [
-#   "vetis-smol/rust-tls",
-#   "dep:smol"
-# ]
-runtime-tokio = [
-  "vetis-tokio/rust-tls",
-  "dep:tokio"
-]
+runtime-tokio = ["vetis-tokio/rust-tls", "dep:tokio"]
 
 [dependencies]
-#compio = { version = "0.19.2", optional = true, default-features = false }
 duration-str = "0.21.0"
 http.workspace = true
 hyper-body-utils.workspace = true
-minimime = "1.0.0"
+log.workspace = true
 regex = "1.12.4"
-#smol = { version = "2.0.2", optional = true, default-features = false }
-#send_wrapper = { version = "0.6.0", optional = true }
+#send_wrapper = "0.6.0"
 serde = { version = "1.0.228", features = ["derive"] }
 time = "0.3.55"
 tokio = { version = "1.52.3", optional = true, default-features = false }
-typetag = "0.2.21"
+typetag.workspace = true
 vetis.workspace = true
 #vetis-compio = { version = "0.1.0", optional = true, default-features = false }
 #vetis-smol = { version = "0.1.0", optional = true, default-features = false }
 vetis-tokio = { workspace = true, optional = true, default-features = false }
+upon = "0.11.0"
 
 [dev-dependencies]
 caramelo = "0.1.5"
-#compio = { version = "0.19.2", default-features = false }
+compio = { version = "0.19.2", default-features = false }
 deboa.workspace = true
 # deboa-compio = { version = "0.1.1", default-features = false, features = [
 #   "http2",
@@ -68,7 +59,6 @@ deboa-tokio = { workspace = true, default-features = false, features = [
   "default-rustls-verifier",
 ] }
 serde_yaml_ng = "0.10.0"
-#smol = { version = "2.0.2", default-features = false }
 tokio = { version = "1.52.3", default-features = false, features = ["macros"] }
 #vetis-macros = { path = "../../vetis/vetis-macros" }
 vetis-macros = { version = "0.1.3-beta.5" }

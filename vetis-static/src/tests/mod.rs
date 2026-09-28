@@ -1,9 +1,10 @@
 use crate::StaticPathConfig;
+use vetis::VetisTestResult;
 
 mod path;
 
 #[test]
-fn test_static_files_config() -> Result<(), Box<dyn std::error::Error>> {
+fn test_static_files_config() -> VetisTestResult<()> {
     let static_files_config = StaticPathConfig::builder()
         .uri("/static")
         .extensions("html,css,js")

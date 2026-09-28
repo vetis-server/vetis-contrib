@@ -1,24 +1,21 @@
-use crate::{format_date, StaticFile, StaticFileMetadata, StaticPathConfig};
+use crate::{StaticFile, StaticFileMetadata, StaticPathConfig, format_date};
 use http::{HeaderMap, HeaderValue};
 use hyper_body_utils::HttpBody;
-use log::error;
 #[cfg(unix)]
 use std::os::unix::fs::MetadataExt;
 #[cfg(windows)]
 use std::os::windows::fs::MetadataExt;
-use std::{future::Future, path::PathBuf, pin::Pin, sync::Arc};
+use std::path::PathBuf;
 use tokio::fs::File;
 use vetis::{
-    errors::{FileError, HostError, VetisError},
-    host::path::Path,
-    Request, Response, VetisResult,
+    Request, Response, VetisFutureResult, VetisResult,
+    errors::{ContentError, HostError, VetisError},
+    host::{HostContext, path::Path},
 };
 
 /// Static path
 pub struct StaticPath {
     config: StaticPathConfig,
-    index_file: Option<String>,
-    //file_cache: VetisFileCache,
 }
 
 impl StaticPath {
@@ -32,37 +29,7 @@ impl StaticPath {
     ///
     /// * `StaticPath` - The static path
     pub fn new(config: StaticPathConfig) -> StaticPath {
-        /*
-        let file_cache = if let Some(cache) = config.cache() {
-            CacheBuilder::new(cache.capacity())
-                .time_to_idle(cache.tti())
-                .time_to_live(cache.ttl())
-        } else {
-            CacheBuilder::new(1000)
-                .time_to_idle(Duration::from_secs(60))
-                .time_to_live(Duration::from_secs(60))
-        }
-        .build();
-        */
-
-        if let Some(index_files) = config.index_files() {
-            let directory = PathBuf::from(config.directory());
-            if let Some(index_file) = index_files
-                .iter()
-                .find(|index_file| {
-                    directory
-                        .join(index_file)
-                        .exists()
-                })
-            {
-                return StaticPath {
-                    config: config.clone(),
-                    index_file: Some(index_file.to_string()),
-                    //file_cache,
-                };
-            }
-        }
-        StaticPath { config, index_file: None /*file_cache*/ }
+        StaticPath { config }
     }
 
     async fn cache_file(&self, file_path: &std::path::Path) -> VetisResult<StaticFile> {
@@ -79,8 +46,11 @@ impl StaticPath {
                 {
                     Ok(metadata) => metadata,
                     Err(e) => {
-                        error!("Error getting metadata for file {:?}: {}", file_path, e);
-                        return Err(VetisError::Host(HostError::File(FileError::NotFound)));
+                        let message =
+                            format!("Error getting metadata for file {:?}: {}", file_path, e);
+                        return Err(VetisError::Host(HostError::Content(ContentError::NotFound(
+                            message,
+                        ))));
                     }
                 };
 
@@ -111,8 +81,6 @@ impl StaticPath {
                     etag: None,
                 };
 
-                log::info!("Metadata: {:?}", metadata);
-
                 let max_file_size = if let Some(cache) = self.config.cache() {
                     cache.max_file_size() as u64
                 } else {
@@ -120,11 +88,14 @@ impl StaticPath {
                 };
 
                 let static_file = if metadata.size() < max_file_size {
-                    let data = tokio::fs::read(file_path).await;
-                    if let Ok(data) = data {
-                        StaticFile::Data { data, metadata }
-                    } else {
-                        return Err(VetisError::Host(HostError::File(FileError::NotFound)));
+                    let file_data = tokio::fs::read(file_path).await;
+                    match file_data {
+                        Ok(data) => StaticFile::Data { data, metadata },
+                        Err(e) => {
+                            return Err(VetisError::Host(HostError::Content(
+                                ContentError::NotFound(e.to_string()),
+                            )));
+                        }
                     }
                 } else {
                     StaticFile::File { path: file_path.to_path_buf(), metadata }
@@ -133,8 +104,8 @@ impl StaticPath {
                 Ok(static_file)
             }
             Err(e) => {
-                error!("Error opening file {}: {}", path, e);
-                Err(VetisError::Host(HostError::File(FileError::NotFound)))
+                let message = format!("Error opening file {}: {}", path, e);
+                Err(VetisError::Host(HostError::Content(ContentError::NotFound(message))))
             }
         };
 
@@ -162,31 +133,42 @@ impl StaticPath {
         } else {
             HeaderValue::from_bytes(b"text/plain")
         }
-        .map_err(|_| VetisError::Host(HostError::File(FileError::InvalidMetadata)))?;
+        .map_err(|e| {
+            VetisError::Host(HostError::Content(ContentError::InvalidMetadata(e.to_string())))
+        })?;
 
         if let Some(range) = range {
             let range_info = match range
                 .split_once("=")
-                .ok_or(VetisError::Host(HostError::File(FileError::InvalidRange)))
-            {
+                .ok_or(VetisError::Host(HostError::Content(ContentError::InvalidRange(
+                    "Missing value".to_string(),
+                )))) {
                 Ok(info) => info,
                 Err(e) => return Err(e),
             };
 
             let (unit, range) = range_info;
             if unit != "bytes" {
-                return Err(VetisError::Host(HostError::File(FileError::InvalidRange)));
+                return Err(VetisError::Host(HostError::Content(ContentError::InvalidRange(
+                    "Only bytes ranges are allowed!".to_string(),
+                ))));
             }
 
             let (start, end) = range
                 .split_once("-")
-                .ok_or(VetisError::Host(HostError::File(FileError::InvalidRange)))?;
+                .ok_or(VetisError::Host(HostError::Content(ContentError::InvalidRange(
+                    "Invalid format!".to_string(),
+                ))))?;
             let start = start
                 .parse::<u64>()
-                .map_err(|_| VetisError::Host(HostError::File(FileError::InvalidRange)))?;
+                .map_err(|e| {
+                    VetisError::Host(HostError::Content(ContentError::InvalidRange(e.to_string())))
+                })?;
             let end = end
                 .parse::<u64>()
-                .map_err(|_| VetisError::Host(HostError::File(FileError::InvalidRange)))?;
+                .map_err(|e| {
+                    VetisError::Host(HostError::Content(ContentError::InvalidRange(e.to_string())))
+                })?;
             if start > end || start >= filesize {
                 return Ok(Response::builder()
                     .status(http::StatusCode::RANGE_NOT_SATISFIABLE)
@@ -227,7 +209,11 @@ impl StaticPath {
             Ok(len) => {
                 headers.insert(http::header::CONTENT_LENGTH, len);
             }
-            Err(_) => todo!(),
+            Err(e) => {
+                return Err(VetisError::Host(HostError::Content(ContentError::InvalidMetadata(
+                    e.to_string(),
+                ))));
+            }
         }
         let last_modified = file
             .metadata()
@@ -236,7 +222,11 @@ impl StaticPath {
         headers.insert(
             http::header::LAST_MODIFIED,
             date.parse()
-                .map_err(|_| VetisError::Host(HostError::File(FileError::InvalidMetadata)))?,
+                .map_err(|e: http::header::InvalidHeaderValue| {
+                    VetisError::Host(HostError::Content(ContentError::InvalidMetadata(
+                        e.to_string(),
+                    )))
+                })?,
         );
 
         let mime_type = file
@@ -245,8 +235,11 @@ impl StaticPath {
         if let Some(mime_type) = mime_type {
             headers.insert(
                 http::header::CONTENT_TYPE,
-                HeaderValue::from_str(mime_type)
-                    .map_err(|_| VetisError::Host(HostError::File(FileError::InvalidMetadata)))?,
+                HeaderValue::from_str(mime_type).map_err(|e| {
+                    VetisError::Host(HostError::Content(ContentError::InvalidMetadata(
+                        e.to_string(),
+                    )))
+                })?,
             );
         }
 
@@ -256,20 +249,6 @@ impl StaticPath {
             .empty();
 
         Ok(response)
-    }
-
-    async fn serve_index_file(&self, directory: &std::path::Path) -> VetisResult<Response> {
-        match &self.index_file {
-            Some(index_file) => {
-                let full_path = directory.join(index_file);
-                self.serve_file(&full_path, None)
-                    .await
-            }
-            None => {
-                println!("No index file configured");
-                Err(VetisError::Host(HostError::File(FileError::NotFound)))
-            }
-        }
     }
 }
 
@@ -291,8 +270,8 @@ impl Path for StaticPath {
     fn handle<'a>(
         &'a self,
         request: Request,
-        uri: Arc<String>,
-    ) -> Pin<Box<dyn Future<Output = Result<Response, VetisError>> + Send + 'a>> {
+        host_context: HostContext,
+    ) -> VetisFutureResult<'a, Response> {
         Box::pin(async move {
             let ext_regex = regex::Regex::new(
                 self.config
@@ -304,29 +283,46 @@ impl Path for StaticPath {
                     .directory(),
             );
 
-            let uri = uri
+            let uri = host_context
+                .path_uri()
                 .strip_prefix("/")
-                .unwrap_or(&uri);
-            let file = directory.join(uri);
+                .unwrap_or(&host_context.path_uri());
 
-            if self
+            let static_dir = if directory.is_relative()
+                && let Some(root_dir) = host_context.root_directory()
+            {
+                root_dir.join(&directory)
+            } else {
+                directory.to_path_buf()
+            };
+
+            let file = static_dir.join(uri);
+            if let Some(index_files) = self
                 .config
                 .index_files()
-                .is_some()
+                && file.is_dir()
             {
-                if !file.exists() {
-                    if let Ok(ext_regex) = ext_regex {
-                        if !ext_regex.is_match(uri.as_ref()) {
-                            return Err(VetisError::Host(HostError::File(FileError::NotFound)));
-                        }
+                for index in index_files {
+                    let path_to_index = static_dir.join(index);
+                    if path_to_index.exists() {
+                        return self
+                            .serve_file(&path_to_index, None)
+                            .await;
                     }
-                } else if file.is_dir() {
-                    return self
-                        .serve_index_file(&file)
-                        .await;
                 }
-            } else if !file.exists() {
-                return Err(VetisError::Host(HostError::File(FileError::NotFound)));
+                return Err(VetisError::Host(HostError::Content(ContentError::Forbidden)));
+            }
+
+            if !file.exists() {
+                return Err(VetisError::Host(HostError::Content(ContentError::NotFound(
+                    "File does not exist".to_string(),
+                ))));
+            }
+
+            if let Ok(ext_regex) = ext_regex
+                && !ext_regex.is_match(uri.as_ref())
+            {
+                return Err(VetisError::Host(HostError::Content(ContentError::Forbidden)));
             }
 
             if request.method() == http::Method::HEAD {
@@ -339,15 +335,17 @@ impl Path for StaticPath {
                 .headers()
                 .contains_key(http::header::RANGE)
             {
-                let value = request
+                if let Some(header) = request
                     .headers()
-                    .get(http::header::RANGE);
-                Some(
-                    value
-                        .unwrap()
-                        .to_str()
-                        .unwrap(),
-                )
+                    .get(http::header::RANGE)
+                {
+                    match header.to_str() {
+                        Ok(v) => Some(v),
+                        Err(_) => None,
+                    }
+                } else {
+                    None
+                }
             } else {
                 None
             };
