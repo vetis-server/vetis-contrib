@@ -1,0 +1,28 @@
+worker_threads: 24
+max_blocking_threads: 120
+
+server:
+  workers: 1
+  hosts:
+    - hostname: "localhost"
+      root_directory: ".."
+      allow_unsafe_conn: false
+      protos:
+        - "HTTP/2.0"
+      bind_addresses:
+        - ["0.0.0.0", 8443]
+      security:
+        ca_file: "certs/ca.der"
+        cert_file: "certs/server.der"
+        key_file: "certs/server.key.der"
+        supported_alpns:
+          - "h2"
+      paths:
+        - type: "flash_path"
+          uri: "/"
+          response: "Hola VeTiS!"
+          status_code: 200
+        - type: "flash_path"
+          uri: "/template"
+          template: "files/message.html"
+          status_code: 200

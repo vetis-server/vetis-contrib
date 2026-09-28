@@ -1,0 +1,27 @@
+worker_threads: 12
+max_blocking_threads: 6
+
+server:
+  enable_logging: false
+  workers: 1
+  hosts:
+    - hostname: "localhost"
+      root_directory: ".."
+      enable_hsts: false
+      allow_unsafe_conn: false
+      protos:
+        - "HTTP/2.0"
+      status_pages:
+        404: "404.html"
+      bind_addresses:
+        - ["0.0.0.0", 8443]
+      tls:
+        ca_file: "certs/ca.der"
+        cert_file: "certs/server.der"
+        key_file: "certs/server.key.der"
+        supported_alpns:
+          - "H2"
+      paths:
+        - type: "rhai_path"
+          uri: "/"
+          script: "files/index.rhai"
