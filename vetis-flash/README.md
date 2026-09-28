@@ -1,16 +1,10 @@
-# vetis-static
+# vetis-flash
 
 Static file serving support for the vetis HTTP server framework. This module provides efficient static file serving with configurable caching, support for multiple async runtimes, and flexible path configuration.
 
 ## Features
 
 - Serve static files with configurable extensions and directories
-- Built-in caching with TTL (time-to-live) and TTI (time-to-idle) support
-- Support for multiple async runtimes: Tokio, Smol, and Compio
-- Configurable index files for directory requests
-- MIME type detection
-- ETag support for cache validation
-- Memory and disk-based file storage options
 
 ## Installation
 
@@ -18,7 +12,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-vetis-static = "0.1.0-beta.1"
+vetis-flash = "0.1.0"
 ```
 
 ### Runtime Features
@@ -26,8 +20,6 @@ vetis-static = "0.1.0-beta.1"
 Choose the appropriate runtime feature for your project:
 
 - `runtime-tokio` (default): Use with Tokio runtime
-- `runtime-smol`: Use with Smol runtime
-- `runtime-compio`: Use with Compio runtime
 
 ## Configuration
 

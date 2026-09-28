@@ -25,16 +25,9 @@ Currently only Tokio runtime is supported:
 
 - `runtime-tokio` (default): Use with Tokio runtime
 
-Example:
-
-```toml
-[dependencies]
-vetis-proxy = { version = "0.1.0", features = ["runtime-tokio"] }
-```
-
 ## Configuration
 
-### Builder Pattern
+### Using API
 
 Configure reverse proxy using the builder pattern:
 
@@ -47,21 +40,17 @@ let config = ProxyPathConfig::builder()
     .build()?;
 ```
 
-### Deserialization from Configuration
-
-Configure via deserialization (e.g., from YAML):
-
-#### YAML Example
+### vetis.yaml
 
 ```yaml
-type: ProxyPathConfig
+type: proxy
 uri: /api
 target: http://localhost:8080
 ```
 
-## Configuration Options
+### Configuration Options
 
-### ProxyPathConfig
+#### ProxyPathConfig
 
 - **uri**: The URI prefix for the proxy path (required)
 - **target**: The target URL to forward requests to (required)
