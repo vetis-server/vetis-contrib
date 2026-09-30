@@ -908,7 +908,7 @@ dependencies = [
  "time",
  "tokio",
  "tracing-subscriber",
- "vetis",
+ "vetis 0.1.7-beta.4",
  "vetis-static",
  "vetis-tokio",
 ]
@@ -1382,6 +1382,15 @@ name = "is_terminal_polyfill"
 version = "1.70.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
+
+[[package]]
+name = "itertools"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
+dependencies = [
+ "either",
+]
 
 [[package]]
 name = "itertools"
@@ -2066,7 +2075,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b570b25f7617e43d59005d0990ccb79e950a423952cea19671b7a876da390adf"
 dependencies = [
  "anyhow",
- "itertools",
+ "itertools 0.14.0",
  "proc-macro2",
  "quote",
  "syn 2.0.119",
@@ -3207,6 +3216,32 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 [[package]]
 name = "vetis"
 version = "0.1.7-beta.4"
+dependencies = [
+ "bytes",
+ "crossfire",
+ "futures-util",
+ "http",
+ "http-body-util",
+ "http-serde-ext",
+ "hyper",
+ "hyper-body-utils",
+ "log",
+ "logforth-core",
+ "papaya",
+ "patricia_tree",
+ "rand 0.10.3",
+ "serde",
+ "serde_yaml_ng",
+ "socket2",
+ "thiserror",
+ "time",
+ "typetag",
+ "url",
+]
+
+[[package]]
+name = "vetis"
+version = "0.1.7-beta.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6f8dce2129f8a7a76e5df6ee478a3998136cfd769f788db33bc572fc09b8429f"
 dependencies = [
@@ -3251,7 +3286,7 @@ dependencies = [
  "tokio",
  "typetag",
  "upon",
- "vetis",
+ "vetis 0.1.7-beta.4",
  "vetis-macros",
  "vetis-tokio",
 ]
@@ -3264,7 +3299,7 @@ dependencies = [
  "logforth",
  "serde",
  "typetag",
- "vetis",
+ "vetis 0.1.7-beta.4",
 ]
 
 [[package]]
@@ -3276,7 +3311,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.6",
- "vetis",
+ "vetis 0.1.7-beta.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -3287,7 +3322,7 @@ dependencies = [
  "opentelemetry-otlp",
  "serde",
  "typetag",
- "vetis",
+ "vetis 0.1.7-beta.4",
 ]
 
 [[package]]
@@ -3303,7 +3338,7 @@ dependencies = [
  "once_cell",
  "serde",
  "tokio",
- "vetis",
+ "vetis 0.1.7-beta.4",
  "vetis-tokio",
 ]
 
@@ -3319,7 +3354,7 @@ dependencies = [
  "once_cell",
  "serde",
  "tokio",
- "vetis",
+ "vetis 0.1.7-beta.4",
  "vetis-tokio",
 ]
 
@@ -3344,7 +3379,7 @@ dependencies = [
  "time",
  "tokio",
  "typetag",
- "vetis",
+ "vetis 0.1.7-beta.4",
  "vetis-macros",
  "vetis-tokio",
 ]
@@ -3366,7 +3401,7 @@ dependencies = [
  "time",
  "tokio",
  "typetag",
- "vetis",
+ "vetis 0.1.7-beta.4",
  "vetis-macros",
  "vetis-tokio",
 ]
@@ -3374,8 +3409,6 @@ dependencies = [
 [[package]]
 name = "vetis-tokio"
 version = "0.1.2-beta.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95b55bf29d35cb878e266f0105fbbdcb789f5138b821b07a01ccb20a17a2ad43"
 dependencies = [
  "base64",
  "bytes",
@@ -3403,7 +3436,24 @@ dependencies = [
  "tokio",
  "tokio-rustls",
  "typetag",
- "vetis",
+ "vetis 0.1.7-beta.4",
+]
+
+[[package]]
+name = "vetis-ws"
+version = "0.1.0-beta.1"
+dependencies = [
+ "hyper",
+ "hyper-body-utils",
+ "hyper-util",
+ "log",
+ "logforth",
+ "pin-project-lite",
+ "serde",
+ "tokio",
+ "typetag",
+ "vetis 0.1.7-beta.4",
+ "ws-framer",
 ]
 
 [[package]]
@@ -3703,6 +3753,30 @@ name = "writeable"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ad82d2a33cdc9674dc7465672f271e096168fcdbe0f799d9e6db8c5892679dc"
+
+[[package]]
+name = "ws-framer"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bacd6cff21323641597fe251e294f823e04292202a6e3c9721a1e8b82bea57bf"
+dependencies = [
+ "getrandom 0.4.3",
+ "httparse",
+ "itoa",
+ "ws-framer-macros",
+]
+
+[[package]]
+name = "ws-framer-macros"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "67fe343b024b086505b3c647de6eae0c26235934cb9138a180e3ac5f97a6aeda"
+dependencies = [
+ "itertools 0.13.0",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
 
 [[package]]
 name = "xml"
