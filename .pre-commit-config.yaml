@@ -28,12 +28,12 @@ repos:
         types: ["rust"]
         pass_filenames: false
 
-      # - id: cargo-nextest
-      #   name: "cargo nextest"
-      #   entry: "cargo nextest run"
-      #   language: "system"
-      #   types: ["rust"]
-      #   pass_filenames: false
+      - id: cargo-nextest
+        name: "cargo nextest"
+        entry: "cargo nextest run"
+        language: "system"
+        types: ["rust"]
+        pass_filenames: false
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.41.0

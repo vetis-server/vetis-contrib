@@ -9,7 +9,6 @@ vetis-log adds several different log strategies to vetis server, feel free to ch
 - file with rolling strategies
 - syslog
 - journald
-- opentelemetry
 
 ## Installation
 
