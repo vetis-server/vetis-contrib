@@ -1,0 +1,47 @@
+[package]
+name = "vetis-ws"
+version = "0.1.0-beta.1"
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Very Tiny Server websockets support"
+readme = "README.md"
+license.workspace = true
+keywords = ["http", "modules", "logging", "tracing"]
+publish = true
+rust-version.workspace = true
+
+[features]
+default = ["runtime-tokio"]
+
+runtime-tokio = ["dep:tokio"]
+
+[dependencies]
+hyper = { version = "1.10.1", default-features = false, features = [
+    "http1",
+    "server",
+] }
+hyper-body-utils = { version = "0.1.17", default-features = false, features = [
+    "generic",
+] }
+hyper-util = { version = "0.1.21", default-features = false, features = [
+    "server",
+    "http1",
+    "tokio",
+] }
+log = { workspace = true, features = ["serde_core"] }
+logforth = { workspace = true, features = [
+    "append-syslog",
+    "append-file",
+    "bridge-log",
+    "layout-text",
+] }
+pin-project-lite = "0.2.17"
+serde = { version = "1.0.229", features = ["derive"] }
+tokio = { version = "1.52.3", features = [
+    "fs",
+], default-features = false, optional = true }
+typetag = "0.2.21"
+vetis.workspace = true
+ws-framer = "0.3.2"
