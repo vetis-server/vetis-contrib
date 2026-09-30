@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+#![deny(missing_docs)]
 use crate::tokio::RhaiPath;
 use serde::{Deserialize, Serialize};
 use vetis::{
@@ -6,7 +8,9 @@ use vetis::{
     host::path::{Path, PathConfig},
 };
 
+/// Request module
 pub mod request;
+/// Response module
 pub mod response;
 
 #[cfg(test)]
