@@ -1,6 +1,7 @@
 #[cfg(feature = "runtime-tokio")]
 mod tokio {
     use crate::common::{CA_CERT, SERVER_CERT, SERVER_KEY};
+    use caramelo::{expect, matchers::eq};
     use deboa::{
         cert::{CertificateExt as _, ContentEncoding},
         request::DeboaRequestBuilder,
@@ -44,7 +45,7 @@ mod tokio {
                             vetis_ws::proto::websocket::Message::Text(text) => {
                                 println!("Server received: {}", text);
                                 socket
-                                    .send_text(&format!("Echo: {}", text))
+                                    .send_text(&text)
                                     .await?;
                             }
                             _ => {}
@@ -123,11 +124,12 @@ mod tokio {
         ws.send_text("Hello, WebSocket!")
             .await
             .unwrap();
-        while let Ok(Some(deboa_ws::Message::Text(message))) = ws
+        if let Ok(Some(deboa_ws::Message::Text(message))) = ws
             .read_message()
             .await
         {
             println!("Client received: {}", message);
+            expect(message).to_be(eq("Hello, WebSocket!"));
         }
 
         server

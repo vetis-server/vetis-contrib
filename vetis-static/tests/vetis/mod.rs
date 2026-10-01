@@ -116,7 +116,7 @@ mod tokio {
             StaticPathConfig::builder()
                 .uri("/")
                 .directory("files")
-                .index_files(vec!["index.html".to_string()])
+                .index_files(vec!["index.html".into()])
                 .build()?,
         ));
 
@@ -176,7 +176,7 @@ mod tokio {
             .tls(security_config)
             .bind_addresses(&[(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 9000)])
             .status_pages(status_pages! {
-               404 @ "files/404.html".to_string()
+               404 @ "files/404.html"
             })
             .build()?;
 

@@ -70,7 +70,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .uri("/")
             .directory(root)
             .extensions("\\.(html|js|css|svg|png|ico|jsx|ts|tsx|json|mjs)$")
-            .index_files(vec!["index.html".to_string()])
+            .index_files(vec!["index.html".into()])
             .build()?,
     ));
 

@@ -9,14 +9,14 @@ fn test_static_files_config() -> VetisTestResult<()> {
         .uri("/static")
         .extensions("html,css,js")
         .directory("/var/vetis/www")
-        .index_files(vec!["index.html".to_string(), "index.htm".to_string()])
+        .index_files(vec!["index.html".into(), "index.htm".into()])
         .build()?;
     assert_eq!(static_files_config.uri(), "/static");
     assert_eq!(static_files_config.extensions(), "html,css,js");
     assert_eq!(static_files_config.directory(), "/var/vetis/www");
     assert_eq!(
         static_files_config.index_files(),
-        &Some(vec!["index.html".to_string(), "index.htm".to_string()])
+        &Some(vec!["index.html".into(), "index.htm".into()])
     );
     Ok(())
 }

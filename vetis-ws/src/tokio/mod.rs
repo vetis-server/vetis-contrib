@@ -6,9 +6,8 @@ use hyper::{
     upgrade::Upgraded,
 };
 use hyper_util::rt::TokioIo;
-use std::sync::Arc;
 use vetis::{
-    Request, Response, VetisFutureResult, error,
+    Request, Response, Str, VetisFutureResult, error,
     errors::{HandlerError, HostError, VetisError},
     host::{HostContext, path::Path},
 };
@@ -21,7 +20,7 @@ const CONNECTION_UPGRADE: &str = "upgrade";
 
 /// Builder for handler path
 pub struct WebSocketPathBuilder<P, F> {
-    uri: Arc<str>,
+    uri: Str,
     factory: F,
     sub_proto: P,
 }
@@ -41,7 +40,7 @@ where
     ///
     /// * `Self` - The builder
     pub fn uri(mut self, uri: &str) -> Self {
-        self.uri = Arc::from(uri.to_string());
+        self.uri = Str::from(uri.to_string());
         self
     }
 
@@ -91,7 +90,7 @@ where
 
 /// WebSocket path
 pub struct WebSocketPath<P, F> {
-    uri: Arc<str>,
+    uri: Str,
     factory: F,
     sub_proto: P,
 }

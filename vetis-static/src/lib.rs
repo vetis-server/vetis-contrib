@@ -8,7 +8,7 @@ use std::{
 };
 use time::{OffsetDateTime, format_description::well_known::Rfc2822};
 use vetis::{
-    VetisResult,
+    Str, VetisResult,
     errors::{ConfigError, VetisError},
     host::path::{Path, PathConfig},
 };
@@ -152,10 +152,10 @@ impl StaticPathCache {
 
 /// Builder for creating `StaticPathConfig` instances.
 pub struct StaticPathConfigBuilder {
-    uri: String,
-    extensions: String,
-    directory: String,
-    index_files: Option<Vec<String>>,
+    uri: Str,
+    extensions: Str,
+    directory: Str,
+    index_files: Option<Vec<Str>>,
     cache: Option<StaticPathCache>,
 }
 
@@ -166,7 +166,7 @@ impl StaticPathConfigBuilder {
     ///
     /// * `Self` - The builder.
     pub fn uri(mut self, uri: &str) -> Self {
-        self.uri = uri.to_string();
+        self.uri = uri.into();
         self
     }
 
@@ -176,7 +176,7 @@ impl StaticPathConfigBuilder {
     ///
     /// * `Self` - The builder.
     pub fn extensions(mut self, extensions: &str) -> Self {
-        self.extensions = extensions.to_string();
+        self.extensions = extensions.into();
         self
     }
 
@@ -186,7 +186,7 @@ impl StaticPathConfigBuilder {
     ///
     /// * `Self` - The builder.
     pub fn directory(mut self, directory: &str) -> Self {
-        self.directory = directory.to_string();
+        self.directory = directory.into();
         self
     }
 
@@ -195,7 +195,7 @@ impl StaticPathConfigBuilder {
     /// # Returns
     ///
     /// * `Self` - The builder.
-    pub fn index_files(mut self, index_files: Vec<String>) -> Self {
+    pub fn index_files(mut self, index_files: Vec<Str>) -> Self {
         self.index_files = Some(index_files);
         self
     }
@@ -249,17 +249,17 @@ impl StaticPathConfigBuilder {
 /// Configuration for static file serving.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct StaticPathConfig {
-    uri: String,
-    extensions: String,
-    directory: String,
-    index_files: Option<Vec<String>>,
+    uri: Str,
+    extensions: Str,
+    directory: Str,
+    index_files: Option<Vec<Str>>,
     cache: Option<StaticPathCache>,
 }
 
 #[typetag::serde(name = "static_path")]
 impl PathConfig for StaticPathConfig {
     fn uri(&mut self, uri: &str) {
-        self.uri = uri.to_string();
+        self.uri = uri.into();
     }
 
     fn boxed_clone(&self) -> Box<dyn PathConfig> {
@@ -283,9 +283,9 @@ impl StaticPathConfig {
     /// * `StaticPathConfigBuilder` - The builder.
     pub fn builder() -> StaticPathConfigBuilder {
         StaticPathConfigBuilder {
-            uri: "/".to_string(),
-            extensions: ".html".to_string(),
-            directory: ".".to_string(),
+            uri: "/".into(),
+            extensions: ".html".into(),
+            directory: ".".into(),
             index_files: None,
             cache: Some(StaticPathCache::default()),
         }
@@ -323,7 +323,7 @@ impl StaticPathConfig {
     /// # Returns
     ///
     /// * `&Option<Vec<String>>` - The index_files.
-    pub fn index_files(&self) -> &Option<Vec<String>> {
+    pub fn index_files(&self) -> &Option<Vec<Str>> {
         &self.index_files
     }
 

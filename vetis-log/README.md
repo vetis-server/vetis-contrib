@@ -92,17 +92,6 @@ log_level: "INFO"
 
 - **log_level**: Log level: TRACE, WARN, DEBUG, INFO, ERROR and FATAL
 
-### opentelemetry
-
-```yaml
-dest: opentelemetry
-log_level: "INFO"
-```
-
-#### Configuration Options
-
-- **log_level**: Log level: TRACE, WARN, DEBUG, INFO, ERROR and FATAL
-
 ### Runtime Features
 
 Choose the appropriate runtime feature for your project:

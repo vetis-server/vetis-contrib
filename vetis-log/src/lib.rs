@@ -258,7 +258,7 @@ impl SysLogConfig {
 pub struct FileLogConfigBuilder {
     log_level: Level,
     log_path: PathBuf,
-    roll_strategy: Arc<str>,
+    roll_strategy: Str,
     size: usize,
 }
 
@@ -319,7 +319,7 @@ impl FileLogConfigBuilder {
 pub struct FileLogConfig {
     log_level: Level,
     log_path: PathBuf,
-    roll_strategy: Arc<str>,
+    roll_strategy: Str,
     size: usize,
 }
 

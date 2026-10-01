@@ -303,7 +303,7 @@ impl Path for StaticPath {
                 && file.is_dir()
             {
                 for index in index_files {
-                    let path_to_index = static_dir.join(index);
+                    let path_to_index = static_dir.join(index.as_str());
                     if path_to_index.exists() {
                         return self
                             .serve_file(&path_to_index, None)

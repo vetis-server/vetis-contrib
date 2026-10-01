@@ -87,6 +87,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 
 [[package]]
+name = "arcstr"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "03918c3dbd7701a85c6b9887732e2921175f26c350b4563841d0958c21d57e6d"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "arrayvec"
 version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -888,7 +897,7 @@ dependencies = [
  "time",
  "tokio",
  "tracing-subscriber",
- "vetis 0.1.7-beta.4",
+ "vetis",
  "vetis-static",
  "vetis-tokio",
 ]
@@ -2861,34 +2870,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 name = "vetis"
 version = "0.1.7-beta.4"
 dependencies = [
- "bytes",
- "crossfire",
- "futures-util",
- "http",
- "http-body-util",
- "http-serde-ext",
- "hyper",
- "hyper-body-utils",
- "log",
- "logforth-core",
- "papaya",
- "patricia_tree",
- "rand",
- "serde",
- "serde_yaml_ng",
- "socket2",
- "thiserror",
- "time",
- "typetag",
- "url",
-]
-
-[[package]]
-name = "vetis"
-version = "0.1.7-beta.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f8dce2129f8a7a76e5df6ee478a3998136cfd769f788db33bc572fc09b8429f"
-dependencies = [
+ "arcstr",
  "bytes",
  "crossfire",
  "futures-util",
@@ -2914,13 +2896,11 @@ dependencies = [
 [[package]]
 name = "vetis-macros"
 version = "0.1.3-beta.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0498bde4fa3b9036ace35f109e416ec1d36ad368b01192e28d2524432ca918cc"
 dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.6",
- "vetis 0.1.7-beta.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vetis",
 ]
 
 [[package]]
@@ -2940,7 +2920,7 @@ dependencies = [
  "time",
  "tokio",
  "typetag",
- "vetis 0.1.7-beta.4",
+ "vetis",
  "vetis-macros",
  "vetis-tokio",
 ]
@@ -2975,7 +2955,7 @@ dependencies = [
  "tokio",
  "tokio-rustls",
  "typetag",
- "vetis 0.1.7-beta.4",
+ "vetis",
 ]
 
 [[package]]
@@ -2999,7 +2979,7 @@ dependencies = [
  "serde_yaml_ng",
  "tokio",
  "typetag",
- "vetis 0.1.7-beta.4",
+ "vetis",
  "vetis-tokio",
  "ws-framer",
 ]
