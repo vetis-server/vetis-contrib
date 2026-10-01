@@ -18,6 +18,8 @@ default = ["runtime-tokio"]
 runtime-tokio = ["dep:tokio"]
 
 [dependencies]
+base64 = "0.23.1"
+http.workspace = true
 hyper = { version = "1.10.1", default-features = false, features = [
     "http1",
     "server",
@@ -38,10 +40,25 @@ logforth = { workspace = true, features = [
     "layout-text",
 ] }
 pin-project-lite = "0.2.17"
+rand = "0.10.3"
 serde = { version = "1.0.229", features = ["derive"] }
 tokio = { version = "1.52.3", features = [
-    "fs",
+    "io-util",
 ], default-features = false, optional = true }
 typetag = "0.2.21"
 vetis.workspace = true
 ws-framer = "0.3.2"
+
+[dev-dependencies]
+caramelo = "0.1.5"
+deboa.workspace = true
+deboa-tokio = { workspace = true, default-features = false, features = [
+  "http2",
+  "rust-tls",
+  "default-rustls-provider",
+  "default-rustls-verifier",
+] }
+deboa-ws = { path = "../../deboa-ws" }
+serde_yaml_ng = "0.10.0"
+tokio = { version = "1.52.3", default-features = false, features = ["macros"] }
+vetis-tokio = { workspace = true, features = [ "rust-tls"] }
