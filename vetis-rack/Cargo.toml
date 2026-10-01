@@ -19,7 +19,7 @@ default = []
 http.workspace = true
 hyper-body-utils.workspace = true
 log.workspace = true
-magnus = { version = "0.8.2" }
+magnus = { version = "0.9.0" }
 vetis = { path = "../../vetis/vetis" }
 vetis-tokio = { path = "../../vetis-tokio", optional = true, default-features = false }
 
