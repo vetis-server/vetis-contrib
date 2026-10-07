@@ -1,16 +1,22 @@
 use crate::{
     RhaiPathConfig,
-    request::RhaiRequest,
-    response::{self, RhaiResponse},
+    request::{self, ArchivedRequest},
+    response,
 };
-use http::{HeaderMap, HeaderName, HeaderValue, StatusCode};
-use log::info;
-use rhai::{Engine, Scope};
-use std::{num::TryFromIntError, path::PathBuf, str::FromStr, sync::Arc};
+use crossfire::{
+    MRx,
+    mpmc::{self, Array},
+    oneshot,
+};
+use papaya::HashMap;
+use rhai::{AST, Engine, Scope};
+use rkyv::{rancor, util::AlignedVec};
+use std::{path::PathBuf, sync::Arc};
 use vetis::{
-    Request, Response, VetisFutureResult,
-    errors::{ContentError, HostError, VetisError},
+    Request, Response, VetisFutureResult, VetisResult,
+    errors::VetisError,
     host::{HostContext, path::Path},
+    worker::{Worker, WorkerLink},
 };
 
 /// Rhai path
@@ -58,101 +64,156 @@ impl Path for RhaiPath {
             let script_path = if script_path.is_relative()
                 && let Some(root_dir) = host_context.root_directory()
             {
-                root_dir.join(&script_path)
+                if root_dir.is_relative()
+                    && let Ok(current_dir) = std::env::current_dir()
+                {
+                    current_dir
+                        .join(root_dir)
+                        .join(&script_path)
+                } else {
+                    root_dir.join(&script_path)
+                }
             } else {
                 script_path.to_path_buf()
             };
 
-            // TODO: Move to a worker task or thread
-            let mut engine = Engine::new();
-            engine
-                .register_type_with_name::<RhaiResponse>("RhaiResponse")
-                .register_fn("new_response", RhaiResponse::new)
-                .register_fn("add_header", response::add_header)
-                .register_fn("write", response::write)
-                .register_get("headers", RhaiResponse::get_headers)
-                .register_get_set(
-                    "status_code",
-                    RhaiResponse::get_status_code,
-                    RhaiResponse::set_status_code,
-                );
-
-            let ast = engine
-                .compile_file(script_path)
-                .map_err(|e| {
-                    info!("Error: {}", e.to_string());
-                    VetisError::Handler(format!("Couldt not compile script: {}", e.to_string()))
-                })?;
-
-            let mut rhai_request = RhaiRequest::new(
+            let mut script_request = request::Request::new(
                 &request
                     .uri()
                     .to_string(),
             );
-            rhai_request.set_method(
+            script_request.set_script_path(
+                script_path
+                    .to_str()
+                    .unwrap(),
+            );
+            script_request.set_method(
                 &request
                     .method()
                     .to_string(),
             );
-            rhai_request.set_version(&format!("{:?}", request.version()));
 
-            let engine = Arc::new(engine);
-            let ast = Arc::new(ast);
-            let request = Arc::new(rhai_request);
-
-            let engine = engine.clone();
-            let ast = ast.clone();
-            let request = request.clone();
-
-            let result = tokio::task::spawn_blocking(move || {
-                let mut scope = Scope::new();
-                scope.push("request", request);
-                engine.eval_ast_with_scope::<RhaiResponse>(&mut scope, &ast)
-            })
-            .await
-            .map_err(|e| {
-                VetisError::Handler(format!("Could not execute script: {}", e.to_string()))
-            })?;
-
-            if let Ok(mut response) = result {
-                let header_map = response
-                    .get_headers()
-                    .iter()
-                    .try_fold(HeaderMap::default(), |mut acc, (name, value)| {
-                        let header_name = HeaderName::from_str(name)
-                            .map_err(|e| VetisError::Handler(e.to_string()))?;
-                        let header_value = HeaderValue::from_str(&value.to_string())
-                            .map_err(|e| VetisError::Handler(e.to_string()))?;
-                        acc.insert(header_name, header_value);
-                        Ok::<HeaderMap, VetisError>(acc)
-                    })?;
-
-                let status_code = response
-                    .get_status_code()
-                    .try_into()
-                    .map_err(|e: TryFromIntError| VetisError::Handler(e.to_string()))
-                    .and_then(|status_code| {
-                        StatusCode::from_u16(status_code)
-                            .map_err(|e| VetisError::Handler(e.to_string()))
-                    })?;
-
-                let response = Response::builder()
-                    .status(status_code)
-                    .headers(header_map)
-                    .bytes(&response.get_body());
-                Ok(response)
-            } else {
-                info!(
-                    "Error: {}",
-                    result
-                        .err()
-                        .unwrap()
-                        .to_string()
-                );
-                Err(VetisError::Host(HostError::Content(ContentError::NotFound(
-                    "Missing script".into(),
-                ))))
-            }
+            /*
+            let bytes =
+                rkyv::to_bytes::<rancor::Error>(&script_request).expect("Failed to serialize");
+            */
+            Ok(Response::builder().empty())
         })
+    }
+}
+
+///RhaiScriptWorker
+pub struct RhaiScriptWorker {
+    id: usize,
+    engine: Engine,
+    cache: HashMap<String, Arc<AST>>,
+    receiver: MRx<Array<(AlignedVec, oneshot::TxOneshot<AlignedVec>)>>,
+    link: WorkerLink<AlignedVec>,
+}
+
+impl RhaiScriptWorker {
+    /// Creates a new instance of worker
+    pub fn new(id: usize) -> Self {
+        let mut engine = Engine::new();
+        engine
+            .register_type_with_name::<response::Response>("RhaiResponse")
+            .register_fn("new_response", response::Response::new)
+            .register_fn("add_header", response::add_header)
+            .register_fn("write", response::write)
+            .register_get("headers", response::Response::get_headers)
+            .register_get_set(
+                "status_code",
+                response::Response::get_status_code,
+                response::Response::set_status_code,
+            );
+
+        let (sender, receiver) = mpmc::bounded_async_blocking(20000);
+
+        Self {
+            id,
+            engine: engine.into(),
+            cache: HashMap::new().into(),
+            receiver: receiver.into(),
+            link: WorkerLink::new("rhai", sender),
+        }
+    }
+}
+
+impl Worker for RhaiScriptWorker {
+    type MessageType = AlignedVec;
+
+    fn id(&self) -> usize {
+        self.id
+    }
+
+    fn link(&self) -> &WorkerLink<AlignedVec> {
+        &self.link
+    }
+
+    fn run(&self) -> VetisResult<()> {
+        while let Ok(raw_request) = self.receiver.recv() {
+            let request = rkyv::access::<ArchivedRequest, rkyv::rancor::Error>(&raw_request.0)
+                .expect("Could not receive request!");
+
+            let script_path = request
+                .script_path
+                .to_string();
+            let ast = if !self
+                .cache
+                .pin()
+                .contains_key(&script_path)
+            {
+                let ast = self
+                    .engine
+                    .compile_file(
+                        script_path
+                            .clone()
+                            .into(),
+                    )
+                    .map_err(|e| {
+                        //info!("Error: {}", e.to_string());
+                        VetisError::Worker(format!("Couldt not compile script: {}", e.to_string()))
+                    })?;
+
+                let new_ast = Arc::new(ast);
+                let ret_ast = new_ast.clone();
+                self.cache
+                    .pin()
+                    .insert(script_path.clone(), new_ast);
+                ret_ast
+            } else {
+                self.cache
+                    .pin()
+                    .get(&script_path.clone())
+                    .unwrap()
+                    .clone()
+            };
+
+            let request = request::Request::new(
+                &request
+                    .uri
+                    .to_string(),
+            );
+
+            let mut scope = Scope::new();
+            scope.push("request", request);
+            let result = self
+                .engine
+                .eval_ast_with_scope::<response::Response>(&mut scope, &ast);
+
+            let response = result.unwrap_or_else(|_f| {
+                let mut response = response::Response::new();
+                response.set_status_code(500);
+                response
+            });
+
+            let bytes = rkyv::to_bytes::<rancor::Error>(&response).expect("Failed to serialize");
+
+            raw_request
+                .1
+                .send(bytes);
+        }
+
+        Ok(())
     }
 }

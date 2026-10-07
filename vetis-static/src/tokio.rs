@@ -172,11 +172,11 @@ impl StaticPath {
             if start > end || start >= filesize {
                 return Ok(Response::builder()
                     .status(http::StatusCode::RANGE_NOT_SATISFIABLE)
-                    .body(HttpBody::from_text("")));
+                    .body(HttpBody::text("")));
             } else if start < end && end < filesize {
                 return Ok(Response::builder()
                     .status(http::StatusCode::PARTIAL_CONTENT)
-                    .body(HttpBody::from_bytes(file.data().unwrap())));
+                    .body(HttpBody::bytes(file.data().unwrap())));
             }
         }
 
@@ -190,7 +190,7 @@ impl StaticPath {
             )
             .header(http::header::CONTENT_LENGTH, HeaderValue::from(filesize))
             .header(http::header::CONTENT_TYPE, mimetype)
-            .body(HttpBody::from_bytes(file.data().unwrap())))
+            .body(HttpBody::bytes(file.data().unwrap())))
     }
 
     async fn serve_metadata(&self, file_path: PathBuf) -> VetisResult<Response> {

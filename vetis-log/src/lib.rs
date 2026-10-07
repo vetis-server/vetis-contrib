@@ -13,12 +13,16 @@ use logforth::{
     },
     core::DispatchBuilder,
     filter::FilterResult,
-    layout::TextLayout,
     record::{self, FilterCriteria, Record},
 };
 use serde::{Deserialize, Serialize};
-use std::{num::NonZeroUsize, ops::Deref, path::PathBuf, sync::Arc};
-use vetis::log::LogConfig;
+use std::{num::NonZeroUsize, ops::Deref, path::PathBuf};
+use vetis::{Str, log::LogConfig};
+
+use crate::layout::TextLayout;
+
+/// Log configuration module
+pub mod layout;
 
 #[derive(Debug)]
 /// TargetFilter is used to dispatch by target
@@ -346,7 +350,7 @@ impl LogConfig for FileLogConfig {
 
     fn into_builder(&self, target: &str, input: DispatchBuilder<false>) -> DispatchBuilder<true> {
         let mut builder = FileBuilder::new(&self.log_path, target)
-            .layout(TextLayout::default().no_color())
+            .layout(TextLayout::default())
             .filename_suffix("log");
 
         builder = match self

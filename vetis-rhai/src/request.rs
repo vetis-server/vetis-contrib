@@ -1,23 +1,26 @@
 #![allow(unused, dead_code)]
-#[derive(Clone)]
+use rkyv::{Archive, Deserialize, Serialize};
+
+#[derive(Debug, Clone, Deserialize, Serialize, Archive)]
+#[rkyv(derive(Debug))]
 /// Internal rhai response
-pub struct RhaiRequest {
-    uri: String,
-    script_path: String,
-    method: String,
-    version: String,
-    headers: Vec<(String, String)>,
+pub struct Request {
+    pub(crate) uri: String,
+    pub(crate) script_path: String,
+    pub(crate) method: String,
+    pub(crate) version: String,
+    pub(crate) headers: Vec<(String, String)>,
 }
 
 /// Add a header to request
-pub fn add_header(request: &mut RhaiRequest, name: &str, value: &str) {
+pub fn add_header(request: &mut Request, name: &str, value: &str) {
     request
         .headers
         .push((name.into(), value.into()));
 }
 
-impl RhaiRequest {
-    /// Create a new RhaiRequest instance
+impl Request {
+    /// Create a new Request instance
     pub fn new(uri: &str) -> Self {
         Self {
             uri: uri.into(),
@@ -26,6 +29,11 @@ impl RhaiRequest {
             version: "HTTP/1.1.".into(),
             headers: Vec::new(),
         }
+    }
+
+    /// Allot set script path
+    pub fn set_script_path(&mut self, path: &str) {
+        self.script_path = path.into()
     }
 
     /// Returns script path

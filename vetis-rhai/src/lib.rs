@@ -9,9 +9,9 @@ use vetis::{
 };
 
 /// Request module
-pub mod request;
+pub(crate) mod request;
 /// Response module
-pub mod response;
+pub(crate) mod response;
 
 #[cfg(test)]
 mod tests;
@@ -72,7 +72,7 @@ pub struct RhaiPathConfig {
     script: String,
 }
 
-#[typetag::serde(name = "rhai_path")]
+#[typetag::serde(name = "rhai")]
 impl PathConfig for RhaiPathConfig {
     fn uri(&mut self, uri: &str) {
         self.uri = uri.to_string();

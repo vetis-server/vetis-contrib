@@ -115,7 +115,7 @@ pub struct FlashPathConfig {
     headers: Option<Vec<(String, String)>>,
 }
 
-#[typetag::serde(name = "flash_path")]
+#[typetag::serde(name = "flash")]
 impl PathConfig for FlashPathConfig {
     fn uri(&mut self, uri: &str) {
         self.uri = uri.to_string();

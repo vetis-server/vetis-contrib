@@ -79,6 +79,8 @@ mod tokio {
                         "Hello World!"
                     );
 
+                    //ctrl_c().await;
+
                     server
                         .stop()
                         .await?;

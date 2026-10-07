@@ -73,6 +73,7 @@ pub struct ReverseProxyPathConfig {
     // TODO: Add support for custom headers
 }
 
+#[typetag::serde(name = "rev-proxy")]
 impl ReverseProxyPathConfig {
     /// Creates a new `ProxyPathConfigBuilder` with default settings.
     ///

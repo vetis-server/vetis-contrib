@@ -256,7 +256,7 @@ pub struct StaticPathConfig {
     cache: Option<StaticPathCache>,
 }
 
-#[typetag::serde(name = "static_path")]
+#[typetag::serde(name = "static")]
 impl PathConfig for StaticPathConfig {
     fn uri(&mut self, uri: &str) {
         self.uri = uri.into();

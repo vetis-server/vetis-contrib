@@ -34,4 +34,4 @@ vetis-tokio.workspace = true
 
 [dev-dependencies]
 caramelo = "0.1.4"
-tokio = { version = "1.53.1", default-features = false, features = ["macros"] }
+tokio = { workspace = true, default-features = false, features = ["macros"] }

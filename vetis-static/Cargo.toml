@@ -38,7 +38,7 @@ regex = "1.12.4"
 #send_wrapper = { version = "0.6.0", optional = true }
 serde = { version = "1.0.228", features = ["derive"] }
 time = "0.3.55"
-tokio = { version = "1.52.3", optional = true, default-features = false }
+tokio = { workspace = true, optional = true }
 typetag = "0.2.21"
 vetis.workspace = true
 #vetis-compio = { version = "0.1.0", optional = true, default-features = false }
@@ -69,6 +69,6 @@ deboa-tokio = { workspace = true, default-features = false, features = [
 ] }
 serde_yaml_ng = "0.10.0"
 #smol = { version = "2.0.2", default-features = false }
-tokio = { version = "1.52.3", default-features = false, features = ["macros"] }
+tokio = { workspace = true, default-features = false, features = ["macros"] }
 vetis-macros = { path = "../../vetis/vetis-macros" }
 #vetis-macros = { version = "0.1.3-beta.5" }
