@@ -1,8 +1,21 @@
-use serde::Deserialize;
-use std::{collections::HashMap, path::Path};
-use vetis::errors::{ConfigError, VetisError};
+use serde::{Deserialize, Serialize};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
+use vetis::{
+    auth::{Auth, AuthConfig},
+    errors::{ConfigError, VetisError},
+};
 
-#[derive(Clone, Debug, Deserialize, PartialEq)]
+#[cfg(feature = "runtime-tokio")]
+use crate::basic::tokio::BasicAuth;
+
+#[cfg(feature = "runtime-tokio")]
+/// Tokio runtime support
+pub mod tokio;
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 /// An enum with authentication algorithms.
 ///
 /// # Variants
@@ -19,12 +32,13 @@ pub enum Algorithm {
 /// A builder for creating a `BasicAuthConfig`.
 pub struct BasicAuthConfigBuilder {
     users: HashMap<String, String>,
+    realm: Option<String>,
     algorithm: Algorithm,
-    htpasswd: Option<String>,
+    htpasswd: Option<PathBuf>,
 }
 
 impl BasicAuthConfigBuilder {
-    /// Allow manually set a hashmap of user and passowrd
+    /// Allow set a hashmap of user and passowrd
     ///
     /// # Returns
     ///
@@ -34,7 +48,17 @@ impl BasicAuthConfigBuilder {
         self
     }
 
-    /// Allow manually set the algorithm
+    /// Allow set realm
+    ///
+    /// # Returns
+    ///
+    /// * `Self` - The builder.
+    pub fn realm(mut self, realm: &str) -> Self {
+        self.realm = Some(realm.into());
+        self
+    }
+
+    /// Allow set the algorithm
     ///
     /// # Returns
     ///
@@ -44,65 +68,13 @@ impl BasicAuthConfigBuilder {
         self
     }
 
-    /// Allow manually set the htpasswd file
+    /// Allow set the htpasswd file
     ///
     /// # Returns
     ///
     /// * `Self` - The builder.
-    pub fn htpasswd(mut self, htpasswd: &str) -> Self {
-        self.htpasswd = Some(htpasswd.to_owned());
-        self
-    }
-
-    /// Caches the users from the htpasswd file.
-    ///
-    /// # Note
-    ///
-    /// This will read the htpasswd file and cache the users in memory.
-    /// You must call this method before building the config.
-    ///
-    /// # Returns
-    ///
-    /// * `Self` - The builder.
-    pub fn cache_users(mut self) -> Self {
-        if self
-            .htpasswd
-            .is_none()
-        {
-            return self;
-        }
-
-        if let Some(htpasswd) = &self.htpasswd {
-            let htpasswd = Path::new(htpasswd);
-            if !htpasswd.exists() {
-                return self;
-            }
-
-            let htpasswd = std::fs::read_to_string(htpasswd);
-            match htpasswd {
-                Ok(file) => {
-                    file.lines()
-                        .for_each(|line| {
-                            let credentials = line.split_once(':');
-
-                            if let Some(credentials) = credentials {
-                                self.users.insert(
-                                    credentials
-                                        .0
-                                        .to_string(),
-                                    credentials
-                                        .1
-                                        .to_string(),
-                                );
-                            }
-                        });
-                }
-                Err(e) => {
-                    log::error!("Failed to read htpasswd file: {}", e);
-                }
-            }
-        }
-
+    pub fn htpasswd(mut self, htpasswd: PathBuf) -> Self {
+        self.htpasswd = Some(htpasswd);
         self
     }
 
@@ -123,13 +95,14 @@ impl BasicAuthConfigBuilder {
 
         Ok(BasicAuthConfig {
             users: self.users,
+            realm: self.realm,
             algorithm: self.algorithm,
             htpasswd: self.htpasswd,
         })
     }
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 /// A struct with basic authentication configuration.
 ///
 /// # Fields
@@ -151,8 +124,24 @@ impl BasicAuthConfigBuilder {
 /// ```
 pub struct BasicAuthConfig {
     users: HashMap<String, String>,
+    realm: Option<String>,
     algorithm: Algorithm,
-    htpasswd: Option<String>,
+    htpasswd: Option<PathBuf>,
+}
+
+#[typetag::serde(name = "basic")]
+impl AuthConfig for BasicAuthConfig {
+    fn boxed_clone(&self) -> Box<dyn AuthConfig> {
+        Box::new(self.clone())
+    }
+
+    fn boxed_auth(&self) -> Box<dyn Auth> {
+        Box::new(BasicAuth::new(self.clone()))
+    }
+
+    fn boxed_sync(&self) -> Box<dyn Auth + Send + Sync> {
+        Box::new(BasicAuth::new(self.clone()))
+    }
 }
 
 impl BasicAuthConfig {
@@ -164,6 +153,7 @@ impl BasicAuthConfig {
     pub fn builder() -> BasicAuthConfigBuilder {
         BasicAuthConfigBuilder {
             users: HashMap::new(),
+            realm: None,
             algorithm: Algorithm::BCrypt,
             htpasswd: None,
         }
@@ -191,8 +181,8 @@ impl BasicAuthConfig {
     ///
     /// # Returns
     ///
-    /// * `&Option<String>` - The path to the htpasswd file.
-    pub fn htpasswd(&self) -> &Option<String> {
+    /// * `&Option<PathBuf>` - The path to the htpasswd file.
+    pub fn htpasswd(&self) -> &Option<PathBuf> {
         &self.htpasswd
     }
 }
