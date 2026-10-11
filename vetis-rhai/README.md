@@ -4,7 +4,8 @@ vetis-rhai added rhai scripting support to vetis server.
 
 ## Features
 
-- Serve static files with configurable extensions and directories
+- Dynamic content generation with rhai scripting
+- AST caching for fast script processing
 
 ## Installation
 
