@@ -22,6 +22,6 @@ server:
         supported_alpns:
           - "H2"
       paths:
-        - type: "rhai_path"
+        - type: "rhai"
           uri: "/"
           script: "files/index.rhai"

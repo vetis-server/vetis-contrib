@@ -18,7 +18,7 @@ server:
         supported_alpns:
           - "h2"
       paths:
-        - type: "flash_path"
+        - type: "flash"
           uri: "/"
           response: "Hola VeTiS!"
           status_code: 200

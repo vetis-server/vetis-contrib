@@ -23,7 +23,7 @@ server:
       error_pages:
         404: "404.html"
       paths:
-        - type: "static_path"
+        - type: "static"
           uri: "/"
           directory: "files"
           extensions: "\\.(html)$"
