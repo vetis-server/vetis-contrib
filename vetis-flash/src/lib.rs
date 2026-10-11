@@ -19,6 +19,7 @@ pub struct FlashPathConfigBuilder {
     uri: String,
     response: Option<String>,
     template: Option<String>,
+    enable_cache: bool,
     status_code: u16,
     headers: Option<Vec<(String, String)>>,
 }
@@ -51,6 +52,16 @@ impl FlashPathConfigBuilder {
     /// * `Self` - The builder.
     pub fn template(mut self, template: &str) -> Self {
         self.template = Some(template.to_string());
+        self
+    }
+
+    /// Allow enable cache for flash path.
+    ///
+    /// # Returns
+    ///
+    /// * `Self` - The builder.
+    pub fn enable_cache(mut self, enable: bool) -> Self {
+        self.enable_cache = enable;
         self
     }
 
@@ -99,6 +110,7 @@ impl FlashPathConfigBuilder {
             uri: self.uri,
             response: self.response,
             template: self.template,
+            enable_cache: self.enable_cache,
             status_code: self.status_code,
             headers: self.headers,
         })
@@ -111,6 +123,7 @@ pub struct FlashPathConfig {
     uri: String,
     response: Option<String>,
     template: Option<String>,
+    enable_cache: bool,
     status_code: u16,
     headers: Option<Vec<(String, String)>>,
 }
@@ -145,6 +158,7 @@ impl FlashPathConfig {
             uri: "/".to_string(),
             response: None,
             template: None,
+            enable_cache: false,
             status_code: 200,
             headers: None,
         }
@@ -175,6 +189,15 @@ impl FlashPathConfig {
     /// * `&str` - The template.
     pub fn template(&self) -> &Option<String> {
         &self.template
+    }
+
+    /// Returns if cache is enabled or not
+    ///
+    /// # Returns
+    ///
+    /// * `bool` - True if cache is enabled, false otherwise.
+    pub fn enable_cache(&self) -> bool {
+        self.enable_cache
     }
 
     /// Returns status code

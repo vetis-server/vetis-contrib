@@ -12,6 +12,7 @@ use vetis::{
 /// Static path
 pub struct FlashPath {
     config: FlashPathConfig,
+    cached_template: Option<String>,
 }
 
 impl FlashPath {
@@ -25,7 +26,7 @@ impl FlashPath {
     ///
     /// * `StaticPath` - The static path
     pub fn new(config: FlashPathConfig) -> FlashPath {
-        FlashPath { config }
+        FlashPath { config, cached_template: None }
     }
 }
 
@@ -43,7 +44,7 @@ impl Path for FlashPath {
     ///
     /// # Returns
     ///
-    /// * `Pin<Box<dyn Future<Output = Result<Response, VetisError>> + Send + '_>>` - The response to the request
+    /// * `VetisFutureResult<'a, Response>` - The response to the request
     fn handle<'a>(
         &'a self,
         _request: Request,
@@ -56,7 +57,7 @@ impl Path for FlashPath {
             {
                 return Ok(Response::builder()
                     .status(http::StatusCode::OK)
-                    .body(HttpBody::from_text(response)));
+                    .body(HttpBody::text(response)));
             } else if let Some(template) = self
                 .config
                 .template()
@@ -74,13 +75,32 @@ impl Path for FlashPath {
                     template_path.to_path_buf()
                 };
 
-                let template = fs::read_to_string(full_template_path)
-                    .await
-                    .map_err(|e| {
-                        VetisError::Host(HostError::Content(ContentError::ServerError(
-                            e.to_string(),
-                        )))
-                    })?;
+                let template = if self
+                    .config
+                    .enable_cache
+                {
+                    if let Some(template) = self.cached_template {
+                        template
+                    } else {
+                        self.cached_template = fs::read_to_string(full_template_path)
+                            .await
+                            .map_err(|e| {
+                                VetisError::Host(HostError::Content(ContentError::ServerError(
+                                    e.to_string(),
+                                )))
+                            })?;
+                        self.cached_template
+                            .clone()
+                    }
+                } else {
+                    fs::read_to_string(full_template_path)
+                        .await
+                        .map_err(|e| {
+                            VetisError::Host(HostError::Content(ContentError::ServerError(
+                                e.to_string(),
+                            )))
+                        })?
+                };
 
                 let mut engine = upon::Engine::new();
                 engine
@@ -103,7 +123,7 @@ impl Path for FlashPath {
 
                 return Ok(Response::builder()
                     .status(http::StatusCode::OK)
-                    .body(HttpBody::from_text(&output)));
+                    .body(HttpBody::text(&output)));
             }
 
             Err(VetisError::Host(HostError::Content(ContentError::NotFound(
