@@ -1,8 +1,5 @@
 #![allow(unused, dead_code)]
-use rkyv::{Archive, Deserialize, Serialize};
-
-#[derive(Debug, Clone, Deserialize, Serialize, Archive)]
-#[rkyv(derive(Debug))]
+#[derive(Debug, Clone)]
 /// Internal rhai response
 pub struct Request {
     pub(crate) uri: String,

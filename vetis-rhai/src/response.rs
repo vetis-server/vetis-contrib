@@ -1,9 +1,7 @@
 #![allow(unused)]
 use bytes::BytesMut;
 use rhai::{Blob, Dynamic, Map};
-use rkyv::{Archive, Deserialize, Serialize};
-
-#[derive(Clone, Deserialize, Serialize, Archive)]
+#[derive(Clone)]
 /// Internal rhai response
 pub struct Response {
     status_code: i64,

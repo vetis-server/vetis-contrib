@@ -1,5 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
+#[cfg(feature = "runtime-tokio")]
 use crate::tokio::RhaiPath;
 use serde::{Deserialize, Serialize};
 use vetis::{
@@ -25,8 +26,6 @@ pub struct RhaiPathConfigBuilder {
     uri: String,
     script: String,
 }
-
-/// TODO: Add link setter
 
 impl RhaiPathConfigBuilder {
     /// Allow set the URI of static path.
