@@ -24,7 +24,7 @@ hyper = { version = "1.10.1", default-features = false, features = [
     "http1",
     "server",
 ] }
-hyper-body-utils = { version = "0.1.17", default-features = false, features = [
+hyper-body-utils = { version = "0.1.18", default-features = false, features = [
     "generic",
 ] }
 hyper-util = { version = "0.1.21", default-features = false, features = [
