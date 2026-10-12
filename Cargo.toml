@@ -3,20 +3,9 @@
 resolver = "3"
 # Include both parts of the library in the workspace
 members = [
-    #"vetis-asgi",
     "vetis-auth",
-    #"vetis-fcgi",
-    #"vetis-flash",
     "vetis-log",
-    #"vetis-otel",
-    #"vetis-proxy",
-    "vetis-rhai",
-    "vetis-rev-proxy",
-    #"vetis-rack",
-    #"vetis-static",
-    #"vetis-ws",
-    #"vetis-wsgi",
-    #"vetis-wt",
+    "vetis-otel",
 ]
 
 [workspace.package]
