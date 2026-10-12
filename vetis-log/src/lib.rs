@@ -22,6 +22,10 @@ use crate::layout::TextLayout;
 /// Log configuration module
 pub mod layout;
 
+#[cfg(test)]
+/// Unit tests for the logging configuration builders and filters.
+pub mod tests;
+
 #[derive(Debug)]
 /// TargetFilter is used to dispatch by target
 pub struct TargetFilter {
@@ -172,7 +176,7 @@ impl LogConfig for StderrLogConfig {
     fn into_builder(&self, target: &str, input: DispatchBuilder<false>) -> DispatchBuilder<true> {
         input
             .filter(TargetFilter::new(target, self.log_level))
-            .append(append::Stdout::default().with_layout(TextLayout::default()))
+            .append(append::Stderr::default().with_layout(TextLayout::default()))
     }
 }
 
@@ -182,8 +186,8 @@ impl StderrLogConfig {
     /// # Returns
     ///
     /// * `StderrLogConfigBuilder` - The builder.
-    pub fn builder() -> StdoutLogConfigBuilder {
-        StdoutLogConfigBuilder { log_level: Level::Info }
+    pub fn builder() -> StderrLogConfigBuilder {
+        StderrLogConfigBuilder { log_level: Level::Info }
     }
 }
 

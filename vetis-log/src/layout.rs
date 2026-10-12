@@ -33,7 +33,7 @@ use logforth_core::record::Record;
 /// # Examples
 ///
 /// ```
-/// use logforth_layout_text::TextLayout;
+/// use vetis_log::layout::TextLayout;
 ///
 /// let layout = TextLayout::default();
 /// ```
@@ -58,7 +58,7 @@ impl TextLayout {
     ///
     /// ```
     /// use jiff::tz::TimeZone;
-    /// use logforth_layout_text::TextLayout;
+    /// use vetis_log::layout::TextLayout;
     ///
     /// let layout = TextLayout::default().timezone(TimeZone::UTC);
     /// ```
@@ -78,7 +78,7 @@ impl TextLayout {
     /// ```
     /// use jiff::Timestamp;
     /// use jiff::tz::TimeZone;
-    /// use logforth_layout_text::TextLayout;
+    /// use vetis_log::layout::TextLayout;
     ///
     /// // This is equivalent to the default timestamp format.
     /// let layout = TextLayout::default()
