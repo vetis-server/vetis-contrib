@@ -1601,33 +1601,6 @@ checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
 [[package]]
 name = "vetis"
 version = "0.1.7-beta.5"
-dependencies = [
- "arcstr",
- "bytes",
- "crossfire",
- "futures-util",
- "http",
- "http-body-util",
- "http-serde-ext",
- "hyper",
- "hyper-body-utils",
- "log",
- "logforth-core",
- "papaya",
- "patricia_tree",
- "rand 0.10.3",
- "serde",
- "serde_yaml_ng",
- "socket2",
- "thiserror",
- "time",
- "typetag",
- "url",
-]
-
-[[package]]
-name = "vetis"
-version = "0.1.7-beta.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4c55a07284e41b03928fdb492a9397031cf20f0343eed7087fdf9ac8d899e1f"
 dependencies = [
@@ -1667,7 +1640,7 @@ dependencies = [
  "serde",
  "tokio",
  "typetag",
- "vetis 0.1.7-beta.5",
+ "vetis",
 ]
 
 [[package]]
@@ -1681,7 +1654,7 @@ dependencies = [
  "logforth-core",
  "serde",
  "typetag",
- "vetis 0.1.7-beta.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vetis",
 ]
 
 [[package]]
@@ -1695,7 +1668,7 @@ dependencies = [
  "opentelemetry_sdk",
  "serde",
  "typetag",
- "vetis 0.1.7-beta.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vetis",
 ]
 
 [[package]]

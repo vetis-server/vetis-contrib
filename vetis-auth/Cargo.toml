@@ -27,4 +27,4 @@ papaya = "0.2.5"
 serde = "1.0.228"
 tokio = { workspace = true, features = ["fs"], optional = true }
 typetag.workspace = true
-vetis = { path = "../../vetis/vetis" }
+vetis.workspace = true
