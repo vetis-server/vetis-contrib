@@ -2767,6 +2767,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "vetis-rev-proxy"
+version = "0.1.0-beta.1"
+dependencies = [
+ "caramelo",
+ "deboa",
+ "deboa-tokio",
+ "http",
+ "http-body-util",
+ "once_cell",
+ "serde",
+ "tokio",
+ "typetag",
+ "vetis 0.1.7-beta.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vetis-tokio",
+]
+
+[[package]]
 name = "vetis-rhai"
 version = "0.1.0"
 dependencies = [
