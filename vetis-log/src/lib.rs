@@ -1,16 +1,14 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
 use log::Level;
+#[cfg(target_family = "unix")]
+use logforth::append::syslog::{
+    SyslogBuilder,
+    fasyslog::sender::{SyslogSender::UnixStream, UnixStreamSender},
+};
 use logforth::{
     Diagnostic, Filter,
-    append::{
-        self,
-        file::FileBuilder,
-        syslog::{
-            SyslogBuilder,
-            fasyslog::sender::{SyslogSender::UnixStream, UnixStreamSender},
-        },
-    },
+    append::{self, file::FileBuilder},
     core::DispatchBuilder,
     filter::FilterResult,
     record::{self, FilterCriteria, Record},
@@ -189,11 +187,13 @@ impl StderrLogConfig {
     }
 }
 
+#[cfg(target_family = "unix")]
 /// Builder for creating `SysLogConfig` instances.
 pub struct SysLogConfigBuilder {
     log_level: Level,
 }
 
+#[cfg(target_family = "unix")]
 impl SysLogConfigBuilder {
     /// Allow set the log level.
     ///
@@ -211,20 +211,23 @@ impl SysLogConfigBuilder {
     }
 }
 
-/// Configuration for stderr logging.
+#[cfg(target_family = "unix")]
 #[derive(Clone, Serialize, Deserialize)]
+/// Configuration for stderr logging.
 pub struct SysLogConfig {
     log_level: Level,
     // TODO: Expand to beyond local syslog
     socket_path: String,
 }
 
+#[cfg(target_family = "unix")]
 impl Default for SysLogConfig {
     fn default() -> Self {
         Self { log_level: Level::Info, socket_path: "/var/log/syslog".into() }
     }
 }
 
+#[cfg(target_family = "unix")]
 #[typetag::serde(name = "syslog")]
 impl LogConfig for SysLogConfig {
     fn log_level(&mut self, log_level: Level) {
@@ -247,6 +250,7 @@ impl LogConfig for SysLogConfig {
     }
 }
 
+#[cfg(target_family = "unix")]
 impl SysLogConfig {
     /// Allow create a new `SysLogConfig` with default settings.
     ///
