@@ -1,6 +1,6 @@
 [package]
 name = "vetis-log"
-version = "0.1.0-beta.2"
+version = "0.1.0-beta.3"
 authors.workspace = true
 edition.workspace = true
 repository.workspace = true
@@ -13,7 +13,6 @@ publish = true
 rust-version.workspace = true
 
 [dependencies]
-colored = "3.1.1"
 jiff = "0.2.37"
 log = { workspace = true, features = ["serde_core"] }
 logforth = { workspace = true, features = [

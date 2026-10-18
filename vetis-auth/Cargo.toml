@@ -23,8 +23,7 @@ base64 = { version = "0.23.1", optional = true, default-features = false }
 bcrypt = { version = "0.19.3", optional = true, default-features = false }
 http.workspace = true
 log.workspace = true
-papaya = "0.2.5"
 serde = "1.0.228"
-tokio = { workspace = true, features = ["fs"], optional = true }
+tokio = { workspace = true, features = ["fs", "rt-multi-thread"], optional = true }
 typetag.workspace = true
 vetis.workspace = true
