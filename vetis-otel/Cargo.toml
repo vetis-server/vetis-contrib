@@ -13,11 +13,11 @@ publish = true
 rust-version.workspace = true
 
 [dependencies]
-opentelemetry = "0.33.0"
-opentelemetry-http = "0.33.0"
-opentelemetry-otlp = "0.33.0"
-opentelemetry_sdk = "0.33.0"
-opentelemetry-semantic-conventions = "0.33.0"
-serde = { version = "1.0.228", features = ["derive"] }
-typetag.workspace = true
-vetis.workspace = true
+#opentelemetry = "0.33.0"
+#opentelemetry-http = "0.33.0"
+#opentelemetry-otlp = "0.33.0"
+#opentelemetry_sdk = "0.33.0"
+#opentelemetry-semantic-conventions = "0.33.0"
+#serde = { version = "1.0.228", features = ["derive"] }
+#typetag.workspace = true
+#vetis.workspace = true
