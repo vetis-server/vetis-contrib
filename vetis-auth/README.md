@@ -38,8 +38,14 @@ let config = StdoutLogConfig::builder()
 #### vetis.yaml
 
 ```yaml
-dest: stdout
-log_level: "INFO"
+server:
+  hosts:
+    - hostname: "localhost"
+      modules:
+        - name: "basic_auth"
+          algorithm: "bcrypt"
+          users:
+            "username": "your-bcrypt-hashed-password"
 ```
 
 #### Configuration Options
