@@ -42,8 +42,10 @@ let config = StdoutLogConfig::builder()
 #### vetis.yaml
 
 ```yaml
-dest: stdout
-log_level: "INFO"
+server:
+  log:
+    dest: stdout
+    log_level: "INFO"
 ```
 
 #### Configuration Options
@@ -53,8 +55,10 @@ log_level: "INFO"
 ### stderr
 
 ```yaml
-dest: stderr
-log_level: "INFO"
+server:
+  log:
+    dest: stderr
+    log_level: "INFO"
 ```
 
 #### Configuration Options
@@ -64,8 +68,10 @@ log_level: "INFO"
 ### file
 
 ```yaml
-dest: stdout
-log_level: "INFO"
+server:
+  log:
+    dest: stdout
+    log_level: "INFO"
 ```
 
 #### Configuration Options
@@ -75,8 +81,10 @@ log_level: "INFO"
 ### syslog
 
 ```yaml
-dest: syslog
-log_level: "INFO"
+server:
+  log:
+    dest: syslog
+    log_level: "INFO"
 ```
 
 #### Configuration Options
@@ -86,8 +94,10 @@ log_level: "INFO"
 ### journald
 
 ```yaml
-dest: journald
-log_level: "INFO"
+server:
+  log:
+    dest: journald
+    log_level: "INFO"
 ```
 
 #### Configuration Options
