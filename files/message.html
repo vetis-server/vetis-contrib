@@ -1,9 +1,8 @@
-{% set title = "Vetis!" %}
 <html>
 
 <head>
     <title>
-        {{ title }}
+        {% if title %} {{ title }} {% else %} Vetis! {% endif %}
     </title>
 </head>
 
