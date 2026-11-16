@@ -13,7 +13,7 @@ publish = true
 rust-version.workspace = true
 
 [dependencies]
-jiff = "0.2.37"
+jiff = "1.0.0"
 log = { workspace = true, features = ["serde_core"] }
 logforth = { workspace = true, features = [
     "append-syslog",
