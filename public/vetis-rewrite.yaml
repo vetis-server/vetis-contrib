@@ -1,0 +1,81 @@
+worker_threads: 24
+max_blocking_threads: 120
+
+server:
+  workers: 1
+  hosts:
+    - hostname: "localhost"
+      root_directory: "."
+      allow_unsafe_conn: false
+      protos:
+        - "HTTP/2.0"
+      bind_addresses:
+        - ["0.0.0.0", 8443]
+      tls:
+        ca_file: "certs/ca.der"
+        cert_file: "certs/server.der"
+        key_file: "certs/server.key.der"
+        supported_alpns:
+          - "h2"
+      hooks:
+        - name: "regex_rewrite"
+          matcher:
+            type: "path"
+            paths:
+              - "/hello/world*"
+          target: "/(hello*)/(world*)"
+          replacement: "/$2/$1"
+        - name: "path_replace"
+          matcher:
+            type: "path"
+            paths:
+              - "/app*"
+          target: "/app/service"
+          replacement: "/api"
+        - name: "strip_suffix"
+          matcher:
+            type: "path"
+            paths:
+              - "/portal*"
+          target: "/home"
+        - name: "strip_prefix"
+          matcher:
+            type: "path"
+            paths:
+              - "/home*"
+          target: "/home"
+        - name: "flash"
+          matcher:
+            type: "path"
+            paths:
+              - "/world/hello*"
+          response: "Hello VeTiS!"
+          status_code: 200
+        - name: "flash"
+          matcher:
+            type: "path"
+            paths:
+              - "/api*"
+          response: "Well done!"
+          status_code: 200
+        - name: "flash"
+          matcher:
+            type: "path"
+            paths:
+              - "/portal*"
+          response: "Welcome to Portal!"
+          status_code: 200
+        - name: "flash"
+          matcher:
+            type: "path"
+            paths:
+              - "/service*"
+          response: "Welcome to Services Portal!"
+          status_code: 200
+        - name: "flash"
+          matcher:
+            type: "path"
+            paths:
+              - "/*"
+          response: "Hola VeTiS!"
+          status_code: 200
