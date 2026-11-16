@@ -5,13 +5,8 @@ server:
   workers: 1
   hosts:
     - hostname: "localhost"
-      root_directory: ".."
+      root_directory: "."
       allow_unsafe_conn: false
-      hooks:
-        - name: "basic_auth"
-          algorithm: "bcrypt"
-          users:
-            "Rogerio": "$2a$12$3jIaSaSW6DfuZD./M6d/fOYUI08t/zrrvWqKcra5AL7hi76wh51Me"
       protos:
         - "HTTP/2.0"
       bind_addresses:
@@ -22,14 +17,18 @@ server:
         key_file: "certs/server.key.der"
         supported_alpns:
           - "h2"
-      paths:
-        - type: "flash"
-          enable_cache: true
-          uri: "/"
-          response: "Hola VeTiS!"
-          status_code: 200
-        - type: "flash"
-          enable_cache: true
-          uri: "/template"
+      hooks:
+        - name: "flash"
+          matcher:
+            type: "path"
+            paths:
+              - "/template*"
           template: "files/message.html"
+          status_code: 200
+        - name: "flash"
+          matcher:
+            type: "path"
+            paths:
+              - "/*"
+          response: "Hola VeTiS!"
           status_code: 200

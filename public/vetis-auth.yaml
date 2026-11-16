@@ -1,0 +1,34 @@
+worker_threads: 24
+max_blocking_threads: 120
+
+server:
+  workers: 1
+  hosts:
+    - hostname: "localhost"
+      root_directory: "."
+      allow_unsafe_conn: false
+      protos:
+        - "HTTP/2.0"
+      bind_addresses:
+        - ["0.0.0.0", 8443]
+      tls:
+        ca_file: "certs/ca.der"
+        cert_file: "certs/server.der"
+        key_file: "certs/server.key.der"
+        supported_alpns:
+          - "h2"
+      hooks:
+        - name: "basic_auth"
+          algorithm: "bcrypt"
+          users:
+            "Rogerio": "$2a$12$3jIaSaSW6DfuZD./M6d/fOYUI08t/zrrvWqKcra5AL7hi76wh51Me"
+        - name: "flash"
+          matcher:
+            type: "path"
+            paths:
+              - "/template*"
+          template: "files/message.html"
+          status_code: 200
+        - name: "flash"
+          response: "Hola VeTiS!"
+          status_code: 200
