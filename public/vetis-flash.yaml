@@ -5,7 +5,7 @@ server:
   workers: 1
   hosts:
     - hostname: "localhost"
-      root_directory: "."
+      root_directory: "files"
       allow_unsafe_conn: false
       protos:
         - "HTTP/2.0"
@@ -23,7 +23,7 @@ server:
             type: "path"
             paths:
               - "/template*"
-          template: "files/message.html"
+          template: "public/message.html"
           status_code: 200
         - name: "flash"
           matcher:

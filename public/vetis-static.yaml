@@ -8,7 +8,7 @@ server:
     log_level: "error"
   hosts:
     - hostname: "localhost"
-      root_directory: "."
+      root_directory: "files"
       enable_hsts: false
       allow_unsafe_conn: false
       protos:
@@ -22,10 +22,10 @@ server:
         supported_alpns:
           - "h2"
       error_pages:
-        404: "files/404.html"
+        404: "public/404.html"
       hooks:
         - name: "static"
-          directory: "files"
+          directory: "public"
           extensions: "\\.(html)$"
           index_files:
             - "index.html"

@@ -6,7 +6,7 @@ server:
   workers: 1
   hosts:
     - hostname: "localhost"
-      root_directory: "."
+      root_directory: "files"
       enable_hsts: false
       allow_unsafe_conn: false
       protos:
@@ -23,4 +23,4 @@ server:
           - "h2"
       hooks:
         - name: "rhai"
-          script: "files/index.rhai"
+          script: "public/index.rhai"

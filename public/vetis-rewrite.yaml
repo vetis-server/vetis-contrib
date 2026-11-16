@@ -5,7 +5,7 @@ server:
   workers: 1
   hosts:
     - hostname: "localhost"
-      root_directory: "."
+      root_directory: "files"
       allow_unsafe_conn: false
       protos:
         - "HTTP/2.0"
